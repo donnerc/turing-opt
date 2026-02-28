@@ -1,0 +1,13 @@
+build
+__pycache__
+.vscode
+mdfiles
+published
+NOBUILD
+Pipfile
+venv
+.env
+.theia/
+_build
+*:Zone.Identifier
+programs

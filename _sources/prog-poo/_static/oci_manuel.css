@@ -1,0 +1,70 @@
+table.ocidbtable {
+    width: auto;
+    /* margin: auto; */
+}
+
+.admonition a {
+    color: #173147;
+}
+
+p {
+    text-align: auto;
+}
+
+/*Mise en forme des exemples SQL*/
+
+p.sql{
+        padding: 3px;
+        background-color: #F0E39E;
+        color: black;
+        font-family: "Courier New", Courier, monospace;
+        border:1px dotted #2C2F10;
+        text-indent: 0em;
+        text-align: left;
+    }
+    
+span.instruction{
+        color: navy;
+        background-color: transparent;
+        font-weight: bold;
+    }
+    
+span.table{
+        color: maroon;
+        background-color: transparent;
+        font-weight: bold;
+    }   
+    
+span.attribut{
+        background-color: transparent;
+        color: teal;
+    }
+    
+span.primarykey{
+        border-bottom:thin solid teal;
+    }
+    
+.clause{
+    color: #993333; 
+    font-weight: bold;
+}
+
+    
+span.commentaire{
+        color: green;
+        background-color: transparent;
+    }
+    
+
+    
+span.nomattribut{
+    background-color: transparent;
+    color: blue;
+}
+
+span.valeurattribut{
+    background-color: transparent;
+    color: black;
+    /*font-weight: normal;*/
+    font-style: italic;
+}

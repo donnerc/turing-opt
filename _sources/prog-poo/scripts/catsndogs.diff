@@ -1,0 +1,27 @@
+19a20
+>         self.sound = None
+22a24,25
+>         openSoundPlayer(self.sound)
+>         play()
+30,34c33,34
+< 
+<     def tell(self, x, y): # Overridden
+<         Pet.tell(self, x, y)
+<         openSoundPlayer("wav/dog.wav")
+<         play()
+---
+>         self.sound = "wav/dog.wav"
+>         
+42,46c42
+< 
+<     def tell(self, x, y): # Overridden
+<         Pet.tell(self, x, y)
+<         openSoundPlayer("wav/cat.wav")
+<         play()
+---
+>         self.sound = "wav/cat.wav"
+64c60
+<     delay(1000)
+---
+>     delay(1000)
+
