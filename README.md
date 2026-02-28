@@ -1,4 +1,4 @@
-# Programmation par contraintes avec Python (Cours Turing+ / EPFL)
+# Optimisation combinatoire (Cours Turing2 / EPFL)
 
 https://theory.epfl.ch/CoursTuring/
 
