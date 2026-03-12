@@ -6,28 +6,28 @@ Concepts de programmation par contraintes (PPC)
 ..  contents:: Contenu de la page
     :depth: 3
 
-Résolution du problème des :math:`n` dames
-==========================================
+Résolution du problème des :math:`n`-reines
+===========================================
 
 ..  note:: Vocabulaire
 
     PPC = Programmation par contraintes (français)
     CP = Constraint Programming (anglais)
 
-Au lieu de développer un algorithme spécifique au :math:`n` dames qui ne peut
-fonctionner que pour ce problème, on aimerait écrire un code plus générique
-permettant ensuite de résoudre d'autres problèmes, afin de suivre la philosophie
-de la programmation par contraintes consistant à formuler le problème et laisser
-l'ordinateur trouver les solutions.
+Au lieu de développer un algorithme spécifique au problème des :math:`n`-reines
+qui ne peut fonctionner que pour ce problème, on aimerait écrire un code plus
+générique permettant ensuite de résoudre d'autres problèmes, afin de suivre la
+philosophie de la programmation par contraintes consistant à formuler le
+problème et laisser l'ordinateur trouver les solutions.
 
-Voici à quoi ressemble la modélisation du problème des :math:`n` dames avec le
+Voici à quoi ressemble la modélisation du problème des :math:`n`-reines avec le
 solveur de contraintes ``ToyCSP`` que nous allons développer.
 
 ..  note:: 
 
     Comme son nom l'indique, ce solveur est très limité. Il permettra d'acquérir
     les bases nécessaires au développement ultérieur d'une deuxième version du
-    solveur par la suite, plus performant.
+    solveur, plus performante.
 
     Le solveur ToyCSP est une adaptation Python du solveur de contraintes
     éducatif ``TinyCSP`` qui fait partie du projet MiniCP
@@ -70,8 +70,8 @@ Constatation
 ------------
 
 On constate que l'approche par PPC permet de résoudre le problème avec très peu
-de code. La seule chose que l'on fait est de formuler le problème qui comporte
-trois parties
+de code. La seule chose que l'on fait est de formuler le problème, qui comporte
+trois parties :
 
 #.   Les paramètres
 #.   Les variables de décision
@@ -95,11 +95,11 @@ Survol des concepts essentiels
 ==============================
 
 Comme le montre la figure ci-dessous reprenant le code ci-dessus, la
-programmation par contraintes se base essentiellement sur les concepts suivants:
+programmation par contraintes se base essentiellement sur les concepts suivants :
 
 - Les **paramètres** sont des données inconnues lors de la modélisation mais
   connues avant la résolution. La donnée des paramètres détermine une **instance
-  du problème**. Par exemple, le seul paramètre du problème des :math:`n` dames
+  du problème**. Par exemple, le seul paramètre du problème des :math:`n`-reines
   est la taille de l'échiquier :math:`n`. La donnée de ce paramètre détermine
   complètement le problème et constitue une instance du problème.
 
@@ -109,19 +109,19 @@ programmation par contraintes se base essentiellement sur les concepts suivants:
 
 - Les **contraintes** permettent d'exprimer des relations entre les variables.
   Les contraintes constituent non seulement un outil de formulation du problème
-  comme en mathématiques, mais aussi des outils de raisonnement, par l'entremise
-  de ses algorithmes de propagation. L'**arité** d'une contrainte correspond au
-  nombre de variables qu'elle implique. 
+  comme en mathématiques, mais aussi des outils de raisonnement par l'entremise
+  de leurs algorithmes de propagation. L'**arité** d'une contrainte correspond
+  au nombre de variables qu'elle implique. 
 
 - Le **processus de résolution** est généralement encapsulé dans le solveur et
   **indépendant du modèle**. On peut typiquement imaginer garder le modèle, mais
-  modifier le processus de résolution, en expérimentant avec différentes
+  modifier le processus de résolution en expérimentant avec différentes
   stratégies de recherche préimplémentées dans le solveur. C'est là que réside
   toute la force de la programmation par contraintes : la formulation du
   problème est clairement **découplée** du processus de résolution, ce qui
   permet de modifier le modèle (donc le problème) en conservant la stratégie de
-  résolution ou, au contraire, garder le même modèle mais changer la stratégie
-  de résolution.
+  résolution ou, au contraire, de garder le même modèle mais de changer la
+  stratégie de résolution.
 
 Résoudre le problème de satisfaction de contraintes consiste à assigner à chaque
 variable de décision une valeur issue de son domaine de sorte que toutes les
@@ -132,14 +132,14 @@ contraintes du problème soient satisfaites.
     :width: 100%
 
     Les différentes parties d'un programme en programmation par contraintes pour
-    résoudre le problème des :math:`n` dames.
+    résoudre le problème des :math:`n`-reines.
 
 Les variables
 =============
 
 ..
   Comme vu précédemment, il y a plusieurs manières de modéliser le problème des
-  :math:`n` dames, à savoir de choisir les variables de décision et les
+  :math:`n`-reines, à savoir de choisir les variables de décision et les
   contraintes. 
 
   - Utiliser :math:`n^2` variables :math:`X_{ij}` booléennes, à savoir de domaine
@@ -156,16 +156,16 @@ Les variables
       plus à l'arbre de décision.
 
 
-Le concept de variable de la programmation par contraintes se ditingue fortement
-des variables utilisé dans un langage de programmation impératif comme Python. 
+Le concept de variable en programmation par contraintes se distingue fortement
+des variables utilisées dans un langage de programmation impératif comme Python. 
 
 Les variables en programmation impérative
 -----------------------------------------
 
-En Python, les variables sont essentiellement des moyens de stocker de des
-valeurs en mémoire. Les différentes variables d'un programme impératif ne sont
-pas liées entre elles. Lorsqu'on affecte une valeur à une variable, cela ne
-change jamais la valeur d'une autre variable, comme le montre le code ci-dessous:
+En Python, les variables sont essentiellement des moyens de stocker des valeurs
+en mémoire. Les différentes variables d'un programme impératif ne sont pas liées
+entre elles. Lorsqu'on affecte une valeur à une variable, cela ne change jamais
+la valeur d'une autre variable, comme le montre le code ci-dessous :
 
 ..  activecode:: f8d42a63-a329-4435-aecf-ca0d61420a3a
 
@@ -175,9 +175,9 @@ change jamais la valeur d'une autre variable, comme le montre le code ci-dessous
     print(y) # que vaut y ???
 
 Dans ce code, la ligne ``y = 2 * x + 1`` est une instruction d'affectation. Elle
-constitue une ``opération`` qui lit d'une part la valeur de la variable ``x``
-(évaluation de l'expression à droite) et affectation de la valeur de
-l'expression à la variable ``x``
+constitue une opération qui lit, d'une part, la valeur de la variable ``x``
+(évaluation de l'expression à droite) et affecte, d'autre part, la valeur de
+l'expression à la variable ``y``.
 
 Les variables en programmation par contraintes
 ----------------------------------------------
@@ -231,21 +231,21 @@ Caractéristiques des contraintes
 Définition d'une contrainte
 ---------------------------
 
-Il y a deux manière de définir une contrainte : soit en **intension** ou en
-**extension**
+Il y a deux manières de définir une contrainte : soit en **intension**, soit en
+**extension**.
 
-- Pour définir une contrainte en extension, on énumére les tuples de valeurs
+- Pour définir une contrainte en extension, on énumère les tuples de valeurs
   appartenant à la relation.
 
   ..  admonition:: Exemple
 
       Par exemple, si les domaines des variables :math:`x` et :math:`y`
-      contiennent les valeurs 0, 1 et 2, alors on peut définir la contrainte "x
-      est plus petit que y" en extension par :math:`(x=0\text{ et }y=1)` ou
+      contiennent les valeurs 0, 1 et 2, alors on peut définir la contrainte « x
+      est plus petit que y » en extension par :math:`(x=0\text{ et }y=1)` ou
       :math:`(x=0\text{ et }y=2)` ou :math:`(x=1\text{ et }y=2)`, ou encore par
       :math:`(x,y) \in \{(0,1),(0,2),(1,2)\}`.
 
-- Pour définir une contrainte en intention, on utilise des propriétés
+- Pour définir une contrainte en intension, on utilise des propriétés
   mathématiques connues. 
   
   ..  admonition:: Exemple
@@ -279,13 +279,13 @@ Différents types de contraintes
   exprimées par une comparaison (:math:`=`, :math:`\neq`, :math:`<`,
   :math:`\leq`, :math:`>`, :math:`\geq`) entre deux expressions arithmétiques
   impliquant les variables numériques. Dans ce groupe, on distingue plus
-  finement les types de contraintes suivants:
+  finement les types de contraintes suivants :
 
   - **numériques sur les entiers** : les variables ne peuvent prendre que des
-    valeurs entières 
+    valeurs entières.
 
-  - **mumériques sur les réels** : les variables peuvent prendre des valeurs
-    réelles
+  - **numériques sur les réels** : les variables peuvent prendre des valeurs
+    réelles.
 
   - **les contraintes linéaires** : les expressions arithmétiques ne contiennent
     que des polynômes du premier degré sur les variables. Par exemple :
@@ -296,10 +296,10 @@ Différents types de contraintes
     = 4`.
 
 - Les **contraintes logiques** portent sur des variables booléennes. Les
-  contraintes logiques sont essentiellement des implications logiques :math:`A
-  \Rightarrow B`, les équivalences :math:`A \Leftrightarrow B` ou la non
-  équivalence :math:`A \not\Leftrightarrow B`. Par exemple, :math:`\neg A \wedge
-  B \Rightarrow C`.
+  contraintes logiques sont essentiellement des implications logiques (:math:`A
+  \Rightarrow B`), des équivalences (:math:`A \Leftrightarrow B`) ou la
+  non-équivalence (:math:`A \not\Leftrightarrow B`). Par exemple : :math:`\neg A
+  \wedge B \Rightarrow C`.
 
 Propagation
 -----------
@@ -348,13 +348,13 @@ Problème de satisfaction de contraintes (PSC)
 =============================================
 
 Un problème de satisfaction de contraintes est déterminé par la donnée d'un
-triplet :math:`\langle X, D, C \rangle` où 
+triplet :math:`\langle X, D, C \rangle` où :
 
-- :math:`X` est l'ensemble des variables de décision du problème
-- :math:`D` une fonction qui, à chaque variable :math:`x \in X`, associe son
-  **domaine** :math:`D(x)`, qui correspond aux valeurs possibles que peut
-  prendre la variable
-- :math:`C` qui est un ensemble de contraintes.
+- :math:`X` est l'ensemble des variables de décision du problème ;
+- :math:`D` est une fonction qui, à chaque variable :math:`x \in X`, associe son
+  **domaine** :math:`D(x)`, lequel correspond aux valeurs possibles que peut
+  prendre la variable ;
+- :math:`C` est un ensemble de contraintes.
 
 Résoudre un problème de satisfaction de contraintes :math:`\langle X, D, C
 \rangle` consiste à associer à chaque variable une valeur de son domaine de
