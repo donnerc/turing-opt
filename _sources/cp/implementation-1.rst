@@ -16,6 +16,7 @@ Implémentation des domaines
 
 ..  activecode:: toycsp_impl_domain
     :language: webtp
+    :interpreterargs: branch=branch&layout=["Editor", "Console"]
 
     Définissez une classe ``Domain`` qui permet de représenter le domaine de
     variables entières.
@@ -104,9 +105,13 @@ Implémentation des domaines
 
 ..  reveal:: 3230694d-d66c-4dcc-bbf4-65b29790ab56
     :showtitle: Solution
+    :hidetitle: Cacher
+    :modal:
+    :instructoronly:
 
     ..  activecode:: 5994b380-062a-4d64-9b63-90b8b5a5ce83
         :language: webtp
+        :interpreterargs: branch=branch&layout=["Editor", "Console"]
 
         from typing import Any
 
@@ -263,6 +268,7 @@ Implémentation des variables de décision
 
 ..  activecode:: toycsp_impl_vars
     :language: webtp
+    :interpreterargs: branch=branch&layout=["Editor", "Console"]
 
     Définissez une classe ``Variable`` qui permet de représenter les variables
     de décision entière.
@@ -287,15 +293,16 @@ Implémentation des variables de décision
 
     -   ``__repr__(self) -> str`` : 
 
+    ..
+        ############### Importation dans WebTigerPython ############
+        from pyodide.http import open_url
+        url = 'https://raw.githubusercontent.com/donnerc/pyminicp/refs/heads/main/build/toycsp_bundle.py'
+        with open('toycsp.py', 'w') as fd: fd.write(open_url(url).read())
+        ############################################################
+
     ~~~~
 
-    ############### Importation dans WebTigerPython ############
-    from pyodide.http import open_url
-    url = 'https://raw.githubusercontent.com/donnerc/pyminicp/refs/heads/main/build/toycsp_bundle.py'
-    with open('toycsp.py', 'w') as fd: fd.write(open_url(url).read())
-    ############################################################
-
-    from toycsp import Domain
+    # Coller votre code de la classe Domain ici
 
     class Variable:
         '''
@@ -318,6 +325,9 @@ Implémentation des variables de décision
 
 ..  reveal:: 8a135924-181b-416f-910f-229b7f1bd98c
     :showtitle: Solution
+    :hidetitle: Cacher
+    :modal:
+    :instructoronly:
 
     ..  code-block:: python
 
@@ -369,6 +379,7 @@ présentes dans les autres domaines.
 
 ..  activecode:: toycsp_impl_notequal
     :language: webtp
+    :interpreterargs: branch=branch&layout=["Editor", "Console"]
 
     Définissez une classe ``NotEqual(x, y)`` qui permet de représenter une
     contrainte de non égalité entre les variables :math:`x` et :math:`y`, à
@@ -449,6 +460,9 @@ présentes dans les autres domaines.
 
 ..  reveal:: 6f490d63-d9d5-4bb7-b844-bff400627d42
     :showtitle: Solution
+    :hidetitle: Cacher
+    :modal:
+    :instructoronly:
 
     ..  code-block:: python
             
