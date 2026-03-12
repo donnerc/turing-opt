@@ -8,8 +8,8 @@ Implémentation (étape 1)
 
 Dans cette première étape, nous allons implémenter une version très basique des
 domaines, des variables et de la contrainte ``NotEqual``. Ces contraintes seront
-suffisantes pour résoudre des problème simples tels que les :math:`n` dames ou
-des Sudokus.
+suffisantes pour résoudre des problèmes simples tels que celui des
+:math:`n`-reines ou des Sudokus.
 
 Implémentation des domaines
 ===========================
@@ -24,7 +24,7 @@ Implémentation des domaines
     ..  admonition:: Consignes
         :class: note
 
-        On doit pouvoir instantier un domaine de deux manières : 
+        On doit pouvoir instancier un domaine de deux manières : 
         
         -   En fournissant un nombre entier ``n``. Dans ce cas, le domaine
             contiendra les valeurs ``{0, 1, 2, ..., n-1}``
@@ -32,23 +32,23 @@ Implémentation des domaines
         -   En fournissant un ensemble (``set``). Dans ce cas, le domaine
             contiendra les mêmes valeurs que l'ensemble en question.
 
-        La classe doit posséder les méthodes suivantes
+        La classe doit posséder les méthodes suivantes :
 
         -   ``is_fixed(self) -> bool`` : retourne ``True`` si le domaine est
-            fixé, à savoir s'il se réduit à une seule valeur et ``False`` sinon.
+            fixé (s'il se réduit à une seule valeur) et ``False`` sinon.
         -   ``size(self) -> int`` : retourne le nombre d'éléments présents dans
             le domaine.
-        -   ``__len__(self) -> int``: idem que ``size``
+        -   ``__len__(self) -> int`` : idem que ``size``
         -   ``__repr__(self) -> str`` : retourne la représentation du domaine
             sous la forme ``Domain({v1, v2, ..., vn})``.
 
-        -   ``min(self) -> int`` : retourne la valeur minimale du domaine
+        -   ``min(self) -> int`` : retourne la valeur minimale du domaine.
         -   ``remove(self, v: int) -> bool`` : supprime la valeur ``v`` du
             domaine. Retourne ``True`` si la valeur se trouvait dans le domaine
             avant d'être supprimée et ``False`` si la valeur n'était pas
             présente dans le domaine. Lève l'exception ``Inconsistency`` si le
             domaine est vide après la suppression de la valeur ``v``.
-        -   ``fix(self, v: int)`` : réduit le domaine à a seule valeur ``v``.
+        -   ``fix(self, v: int)`` : réduit le domaine à la seule valeur ``v``.
         -   ``clone(self) -> "Domain"`` : crée une copie du domaine en
             retournant **une nouvelle instance** de ``Domain`` avec les mêmes
             valeurs.
@@ -167,7 +167,7 @@ Implémentation des domaines
                 Initializes a domain. Values are stored as a set.
 
                 - Domain(n) Initializes the domain with {0, 1, 2, ... n-1}
-                - Domain(set) Initializes the domaine with the given set
+                - Domain(set) Initializes the domain with the given set
 
                 """
                 if len(args) != 1:
@@ -271,17 +271,17 @@ Implémentation des variables de décision
     :interpreterargs: branch=branch&layout=["Editor", "Console"]
 
     Définissez une classe ``Variable`` qui permet de représenter les variables
-    de décision entière.
+    de décision entières.
 
     ..  admonition:: Consignes
         :class: note
 
-        On doit pouvoir instantier une variable en passant en paramètre les
+        On doit pouvoir instancier une variable en passant en paramètre les
         valeurs à insérer initialement dans son domaine sous la forme d'un
         itérable (liste, tuple, range, set, ...). On veut également pouvoir
         indiquer le nom de la variable avec le paramètre nommé ``name=``. Si le
         nom n'est pas donné, il sera créé automatiquement en se basant sur le
-        compteur de création de variable (variables de classe) incrémenté lors
+        compteur de création de variables (variable de classe) incrémenté lors
         de chaque instanciation.
 
     ::
@@ -289,18 +289,18 @@ Implémentation des variables de décision
         >>> q1 = Variable([3, 5, 7], name="Q1")
         >>> x = Variable(range(5, 8))
 
-    La classe doit posséder les méthodes suivantes en plus du constructeur
+    La classe doit posséder les méthodes suivantes en plus du constructeur :
 
     -   ``__repr__(self) -> str`` : 
 
-    ..
-        ############### Importation dans WebTigerPython ############
-        from pyodide.http import open_url
-        url = 'https://raw.githubusercontent.com/donnerc/pyminicp/refs/heads/main/build/toycsp_bundle.py'
-        with open('toycsp.py', 'w') as fd: fd.write(open_url(url).read())
-        ############################################################
-
     ~~~~
+
+    ############### Importation dans WebTigerPython ############
+    from pyodide.http import open_url
+    url = 'https://raw.githubusercontent.com/donnerc/pyminicp/refs/heads/main/build/toycsp_bundle.py'
+    with open('toycsp.py', 'w') as fd: fd.write(open_url(url).read())
+    ############################################################
+
 
     # Coller votre code de la classe Domain ici
 
@@ -310,8 +310,9 @@ Implémentation des variables de décision
         >>> v
         Variable(dom={3, 4, 5}, name='Var0')
         >>> v.dom
-        Domain({3, 4, 5)
+        Domain({3, 4, 5})
         >>> v2 = Variable(range(6, 9), name="Q2")
+        >>> v2
         Variable(dom={6, 7, 8}, name='Q2')
         
         '''
@@ -341,7 +342,7 @@ Implémentation des variables de décision
             >>> v
             Variable(dom={3, 4, 5}, name='Var0')
             >>> v.dom
-            Domain({3, 4, 5)
+            Domain({3, 4, 5})
             >>> v2 = Variable(range(6, 9), name="Q2")
             >>> v2
             Variable(dom={6, 7, 8}, name='Q2')
@@ -367,9 +368,9 @@ Implémentation de la contrainte ``NotEqual``
 
 En PPC, l'intérêt des contraintes n'est pas seulement de formuler le problème
 dans la phase de modélisation, mais également de constituer des outils de
-raisonnement par le biais d'**algorithmes de filtrage** spécifique à chaque
-contrainte. Un algorithme de filtrage permet de supprimer des domaines des
-variables impliquées dans la contrainte les valeurs impossibles.
+raisonnement par le biais d'**algorithmes de filtrage spécifiques** à chaque
+contrainte. Un algorithme de filtrage permet de supprimer les valeurs
+impossibles du domaine des variables impliquées dans la contrainte.
 
 En d'autres termes, chaque contrainte :math:`c \in C` s'accompagne d'un
 algorithme de filtrage :math:`\mathcal{F}_c` qui prend en entrée les domaines
@@ -382,7 +383,7 @@ présentes dans les autres domaines.
     :interpreterargs: branch=branch&layout=["Editor", "Console"]
 
     Définissez une classe ``NotEqual(x, y)`` qui permet de représenter une
-    contrainte de non égalité entre les variables :math:`x` et :math:`y`, à
+    contrainte de non-égalité entre les variables :math:`x` et :math:`y`, à
     savoir :math:`x \neq y`. Le constructeur prend aussi un troisième paramètre
     ``offset`` qui permet de spécifier la contrainte :math:`x \neq y +
     \text{offset}`.
@@ -390,7 +391,7 @@ présentes dans les autres domaines.
     ..  admonition:: Consignes
         :class: note
 
-        La classe doit contenir encore les méthodes suivantes:
+        La classe doit également contenir les méthodes suivantes :
 
         -   ``propagate(self) -> bool`` : effectue la propagation (filtrage) sur
             les domaines des variables impliquées dans la contrainte. La
