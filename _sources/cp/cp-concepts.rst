@@ -35,6 +35,7 @@ solveur de contraintes ``ToyCSP`` que nous allons développer.
 
 ..  activecode:: n-queens-modeling-version-1
     :language: webtp
+    :interpreterargs: branch=branch&layout=["Editor", "Console"]
 
     ############### Importation dans WebTigerPython ############
     from pyodide.http import open_url
@@ -103,20 +104,21 @@ programmation par contraintes se base essentiellement sur les concepts suivants:
   complètement le problème et constitue une instance du problème.
 
 - Les **variables de décision** permettent d'exprimer le problème. Chaque
-  variable possède un ``domaine`` correspondant à l'ensemble des valeurs
+  variable possède un **domaine** correspondant à l'ensemble des valeurs
   admissibles pour cette variable dans le problème.
 
 - Les **contraintes** permettent d'exprimer des relations entre les variables.
   Les contraintes constituent non seulement un outil de formulation du problème
-  comme en mathématiques, mais aussi des outils de raisonnement. L'**arité**
-  d'une contrainte correspond au nombre de variables qu'elle implique. 
+  comme en mathématiques, mais aussi des outils de raisonnement, par l'entremise
+  de ses algorithmes de propagation. L'**arité** d'une contrainte correspond au
+  nombre de variables qu'elle implique. 
 
 - Le **processus de résolution** est généralement encapsulé dans le solveur et
   **indépendant du modèle**. On peut typiquement imaginer garder le modèle, mais
-  modifier le processus de résolution, en utilisant expérimentant avec
-  différentes stratégies de recherche préimplémentées dans le solveur. C'est là
-  que réside toute la force de la programmation par contraintes : la formulation
-  du problème est clairement **découplée** du processus de résolution, ce qui
+  modifier le processus de résolution, en expérimentant avec différentes
+  stratégies de recherche préimplémentées dans le solveur. C'est là que réside
+  toute la force de la programmation par contraintes : la formulation du
+  problème est clairement **découplée** du processus de résolution, ce qui
   permet de modifier le modèle (donc le problème) en conservant la stratégie de
   résolution ou, au contraire, garder le même modèle mais changer la stratégie
   de résolution.
