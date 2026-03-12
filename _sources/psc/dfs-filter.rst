@@ -30,38 +30,56 @@ Recherche en profondeur récursive
     lors des cours sur la résolution de labyrinthes.
 
 Voici un code de base utilisant la fonction récursive ``dfs`` pour générer
-récursivement toutes les configurations possible de l'échiquier.
+récursivement toutes les configurations possible de l'échiquier. Utilisez le
+débogueur intégré de WebTigerPython pour comprendre comment la récursion
+fonctionne et comment les appels à la fonction ``dfs`` correspondent à un
+parcours en profondeur d'un arbre de recherche.
 
 ..  activecode:: dfs_filter_base_functional
     :language: webtp
-    :interpreterargs: debug_mode=true&load_python=true
+    :interpreterargs: branch=branch&debug_mode=true&load_python=true
+
+    from collections.abc import Callable
+
+    type PartialSolution =  list[int | None]
+    type Solution = list[int]
+
+    def check_constraints(q: PartialSolution) -> bool:
+        '''
+        Vérifie que toutes les contraintes du problème soient satisfaites dans la
+        solution ``q`` représentant la ligne sur laquelle est placée chaque dames
+        q[i]
+        '''
+        n = len(q)
+
+        for i in range(n):
+            for j in range(i + 1, n):
+                if q[i] == q[j]: return False
+                if q[i] - q[j] == i - j: return False
+                if q[j] - q[i] == i - j: return False
+
+        return True
 
 
-..  reveal:: ffd30f2a-0841-4aa3-beba-0ca71234a2ca
-    :showtitle: Solution
+    def nqueens_solver(n: int) -> None:
+        '''
+        Retourne toutes les solutions pour le problème des n dames
 
-    ..  code-block:: python
+        >>> nqueens_solver(n=1)
+        [[0]]
+        >>> nqueens_solver(n=2)
+        []
+        >>> nqueens_solver(n=3)
+        []
+        >>> nqueens_solver(n=4)
+        [[1, 3, 0, 2], [2, 0, 3, 1]]
+        >>> nqueens_solver(n=5)
+        [[0, 2, 4, 1, 3], [0, 3, 1, 4, 2], [1, 3, 0, 2, 4], [1, 4, 2, 0, 3], [2, 0, 3, 1, 4], [2, 4, 1, 3, 0], [3, 0, 2, 4, 1], [3, 1, 4, 2, 0], [4, 1, 3, 0, 2], [4, 2, 0, 3, 1]]
+        '''
+        def on_solution(queens: Solution) -> None:
+            solutions.append(queens)
 
-        from collections.abc import Iterable
-
-        def check_constraints(q: Iterable[int]) -> bool:
-            '''
-            Vérifie que toutes les contraintes du problème soient satisfaites dans la
-            solution ``q`` représentant la ligne sur laquelle est placée chaque dames
-            q[i]
-            '''
-            n = len(q)
-
-            for i in range(n):
-                for j in range(i + 1, n):
-                    if q[i] == q[j]: return False
-                    if q[i] - q[j] == i - j: return False
-                    if q[j] - q[i] == i - j: return False
-
-            return True
-
-
-        def dfs(queens: Iterable[int], index: int = 0) -> None:
+        def dfs(queens: PartialSolution, index: int = 0) -> None:
             n = len(queens)
             if index == n:
                 if check_constraints(queens):
@@ -72,42 +90,38 @@ récursivement toutes les configurations possible de l'échiquier.
                     queens[index] = i
                     dfs(queens, index=index + 1)
 
+        # Préparation du tableau utilisé pour représenter la solution
+        queens: PartialSolution = [None] * n
+        solutions: list[Solution] = []
 
-        def nqueens_solver(n: int) -> None:
-            '''
-            Retourne toutes les solutions pour le problème des n dames
+        # Générer tous les placements de dames imaginables
+        # => feuilles de l'arbre de recherche
 
-            >>> nqueens_solver(n=1)
-            [[0]]
-            >>> nqueens_solver(n=2)
-            []
-            >>> nqueens_solver(n=3)
-            []
-            >>> nqueens_solver(n=4)
-            [[1, 3, 0, 2], [2, 0, 3, 1]]
-            >>> nqueens_solver(n=5)
-            [[0, 2, 4, 1, 3], [0, 3, 1, 4, 2], [1, 3, 0, 2, 4], [1, 4, 2, 0, 3], [2, 0, 3, 1, 4], [2, 4, 1, 3, 0], [3, 0, 2, 4, 1], [3, 1, 4, 2, 0], [4, 1, 3, 0, 2], [4, 2, 0, 3, 1]]
-            '''
-            def on_solution(queens: list[int]) -> None:
-                solutions.append(queens)
-                
-            # Préparation du tableau utilisé pour représenter la solution
-            queens = [None] * n
-            solutions = []
-            
-            # Générer tous les placements de dames imaginables
-            # => feuilles de l'arbre de recherche
+        dfs(queens)
 
-            dfs(queens)
+        return solutions
 
-            return solutions
+    def test():
+        import doctest
+        doctest.testmod()
+
+    if __name__ == '__main__':
+        sols = nqueens_solver(n=6)
+        print(sols)
 
 
-        if __name__ == '__main__':
-            import doctest
-            doctest.testmod()
 
-            nqueens_solver(n=4)
+..  
+    reveal:: ffd30f2a-0841-4aa3-beba-0ca71234a2ca
+    :showtitle: Solution
+    :hidetitle: Cacher
+    :instructoronly:
+    :modal:
+    :modaltitle: Solution
+
+    ..  code-block:: python
+
+        ...
 
 
 Explications : récursion et arbre de recherche
@@ -140,6 +154,7 @@ Visualisation interactive de la récursion
 
 ..  activecode:: 637b5ed4-1d59-494a-a776-9e68ce13174e
     :language: webtp
+    :interpreterargs: debug_mode=true
 
     from collections.abc import Iterable
 
@@ -262,6 +277,7 @@ Visualisation des solutions faisables
 
 ..  activecode:: d01d487a-c5f0-458b-bef9-f48c6d492db7
     :language: webtp
+    :interpreterargs: branch=branch
 
     from collections.abc import Iterable
 
@@ -384,7 +400,7 @@ Exercice
         Le nombre de configurations à tester est :math:`O(n^n)`, ce qui est
         clairement exponentiel. Il faut encore tenir compte de la complexité de
         la vérification des contraintes qui est :math:`O(n^2)`. La complexité du
-        tout est donc largement exponentiel. 
+        tout est donc largement exponentielle. 
 
         Vous savez ce que cela veut dire : il n'est pas possible d'imaginer
         utiliser cette méthode pour résoudre de grosses instances du problèmes

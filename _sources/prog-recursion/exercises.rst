@@ -10,32 +10,32 @@ Exercices sur la récursion
 Exercice 1.A (produit récursif)
 ===============================
 
+Développer une fonction récursive ``recursive_product(numbers: list[float])
+-> float`` qui prend en argument une liste de nombres ``float`` et retourne
+la somme de cette liste. La fonction ne doit pas utiliser de boucle ``for``
+ou ``while``.
+
+..  admonition:: Conseil
+    
+    Résolvez l'exercice dans https://webtigerpython.ethz.ch
+
+..  admonition:: Exemple d'utilisation
+    :class: note
+
+    ::
+
+        >>> recursive_product([])
+        1.0
+        >>> recursive_product([6])
+        6.0
+        >>> recursive_product([6.0, 2])
+        12.0
+        >>> recursive_product([6, 2, 3])
+        36.0
+
 ..  activecode:: recursive_product_py
-
-    Développer une fonction récursive ``recursive_product(numbers: list[float])
-    -> float`` qui prend en argument une liste de nombres ``float`` et retourne
-    la somme de cette liste. La fonction ne doit pas utiliser de boucle ``for``
-    ou ``while``.
-
-    ..  admonition:: Conseil
-        
-        Résolvez l'exercice dans https://webtigerpython.ethz.ch
-
-    ..  admonition:: Exemple d'utilisation
-        :class: note
-
-        ::
-
-            >>> recursive_product([])
-            1.0
-            >>> recursive_product([6])
-            6.0
-            >>> recursive_product([6.0, 2])
-            12.0
-            >>> recursive_product([6, 2, 3])
-            36.0
-
-    ~~~~
+    :language: webtp
+    :interpreterargs: branch=branch
 
     def recursive_product(numbers: list[float]) -> float:
         '''
@@ -47,44 +47,19 @@ Exercice 1.A (produit récursif)
         12.0
         >>> recursive_product([6, 2, 3])
         36.0
+
+        >>> # pas de boucle for ou while
+        >>> import inspect
+        >>> source = inspect.getsource(recursive_product)
+        >>> any(word in source for word in ["for ", "while "])
+        False
         '''
         
         ...
 
-    def test():
-        import platform
-        if platform.python_implementation() == 'CPython':
-            import doctest
-            doctest.testmod()
-
-    test()
-
-    ====
-    
-    from unittest.gui import TestCaseGui
-
-
-    class myTests(TestCaseGui):
-
-        def test_1(self):
-
-            tests = (
-                ([], 1.0),
-                ([6], 6.0),
-                ([6, 2], 12.0),
-                ([6, 2, 3], 36.0),
-            )
-
-
-            for numbers, expected in tests:
-                result = recursive_product(numbers)
-                
-                feedback = f"Produit OK pour numbers={numbers}"
-                self.assertEqual(result, expected, feedback)
-
-
-    myTests().main()
-
+    if __name__ == "__main__":
+        import doctest
+        doctest.testmod()
 
 ..  reveal:: 03bbc41c-afca-483a-83d0-1563683e6f07
     :showtitle: Solution
@@ -248,53 +223,22 @@ suggérée par les arguments de la fonction récursive.
         >>> recursive_product([6, 2, 3], head=3)
         1
 
+        >>> import inspect
+        >>> source = inspect.getsource(recursive_product)
+        >>> # pas de boucle for ou while
+        >>> any(word in source for word in ["for ", "while "])
+        False
+
+        >>> # pas de slicing
+        >>> any(word in source for word in ["[1:]", "[1 :]", "[ 1:", "[1: ", "[:]", "[: ", "[ :", " [", " ]"])
+        False
         '''
         ...
 
-    def test():
-        import platform
-        if platform.python_implementation() == 'CPython':
-            import doctest
-            doctest.testmod()
+    if __name__ == "__main__":
+        import doctest
+        doctest.testmod()
 
-    test()
-
-    ====
-
-    from unittest.gui import TestCaseGui
-
-
-    class myTests(TestCaseGui):
-
-        def test_1(self):
-
-            tests_without_head = (
-                ([], 1),
-                ([6, 2, 3], 36),
-            )
-
-            tests = (
-                ([], 0, 1),
-                ([6, 2, 3], 0, 36),
-                ([6, 2, 3], 1, 6),
-                ([6, 2, 3], 2, 3),
-                ([6, 2, 3], 3, 1),
-            )
-
-            for numbers, expected in tests_without_head:
-                result = recursive_product(numbers)
-                
-                feedback = f"Produit OK pour numbers={numbers}"
-                self.assertEqual(result, expected, feedback)
-
-            for numbers, head, expected in tests:
-                result = recursive_product(numbers, head)
-                
-                feedback = f"Produit OK pour numbers={numbers} et head={head}"
-                self.assertEqual(result, expected, feedback)
-
-
-    myTests().main()
 
 
 ..  reveal:: e3010534-73e9-4ad0-9ef1-27428a1ce461
@@ -488,56 +432,18 @@ Exercice 3 (Maximum d'une liste)
         >>> max_rec([2, 1, 12, 6, 2, 9])
         12
 
+        >>> import inspect
+        >>> source = inspect.getsource(recursive_product)
+        >>> # pas de boucle for ou while
+        >>> any(word in source for word in ["for ", "while "])
+        False
+
         '''
         ...
 
-    def test():
-        import platform
-        if platform.python_implementation() == 'CPython':
-            import doctest
-            doctest.testmod()
-
-    test()
-
-    ====
-
-    from unittest.gui import TestCaseGui
-
-
-    class myTests(TestCaseGui):
-
-        def test_max2(self):
-
-            tests = (
-                (10, 2, 10),
-                (2, 10, 10),
-                (10, 10, 10),
-            )
-
-            for a, b, expected in tests:
-                result = max2(a, b)
-                
-                feedback = f"max2(a={a}, b={b}) -> {result}"
-                self.assertEqual(result, expected, feedback)
-
-        def test_max_rec(self):
-
-            tests = (
-                ([1], 1),
-                ([1, 2], 2),
-                ([2, 1], 2),
-                ([2, 1, 6, 2, 9], 9),
-                ([2, 1, 12, 6, 2, 9], 12),
-            )
-
-            for numbers, expected in tests:
-                result = max_rec(numbers)
-                
-                feedback = f"max_rec(numbers={numbers}) -> {result}"
-                self.assertEqual(result, expected, feedback)
-
-
-    myTests().main()
+    if __name__ == "__main__":
+        import doctest
+        doctest.testmod()
 
 
 ..  reveal:: f8a7726d-0472-4477-a78f-354dbdad756f

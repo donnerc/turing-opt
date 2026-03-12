@@ -71,9 +71,76 @@ l'algorithme de DFS + élagage. Les idées principales sont les suivantes:
     :language: webtp
     :interpreterargs: debug_mode=true&load_python=true
 
-    ~~~~
+    from collections.abc import Callable
 
-    # rendez votre code ici
+    type PartialSolution =  list[int | None]
+    type Solution = list[int]
+
+    def check_constraints(q: PartialSolution) -> bool:
+        '''
+        Vérifie que toutes les contraintes du problème soient satisfaites dans la
+        solution ``q`` représentant la ligne sur laquelle est placée chaque dames
+        q[i]
+        '''
+        n = len(q)
+
+        for i in range(n):
+            for j in range(i + 1, n):
+                if q[i] == q[j]: return False
+                if q[i] - q[j] == i - j: return False
+                if q[j] - q[i] == i - j: return False
+
+        return True
+
+
+    def nqueens_solver(n: int) -> None:
+        '''
+        Retourne toutes les solutions pour le problème des n dames
+
+        >>> nqueens_solver(n=1)
+        [[0]]
+        >>> nqueens_solver(n=2)
+        []
+        >>> nqueens_solver(n=3)
+        []
+        >>> nqueens_solver(n=4)
+        [[1, 3, 0, 2], [2, 0, 3, 1]]
+        >>> nqueens_solver(n=5)
+        [[0, 2, 4, 1, 3], [0, 3, 1, 4, 2], [1, 3, 0, 2, 4], [1, 4, 2, 0, 3], [2, 0, 3, 1, 4], [2, 4, 1, 3, 0], [3, 0, 2, 4, 1], [3, 1, 4, 2, 0], [4, 1, 3, 0, 2], [4, 2, 0, 3, 1]]
+        '''
+        def on_solution(queens: Solution) -> None:
+            solutions.append(queens)
+
+        def dfs(queens: PartialSolution, index: int = 0) -> None:
+            n = len(queens)
+            if index == n:
+                if check_constraints(queens):
+                    # Attention à faire une copie de la liste `queens`
+                    on_solution(queens[:])
+            else:
+                for i in range(n):
+                    queens[index] = i
+                    dfs(queens, index=index + 1)
+
+        # Préparation du tableau utilisé pour représenter la solution
+        queens: PartialSolution = [None] * n
+        solutions: list[Solution] = []
+
+        # Générer tous les placements de dames imaginables
+        # => feuilles de l'arbre de recherche
+
+        dfs(queens)
+
+        return solutions
+
+    def test():
+        import doctest
+        doctest.testmod()
+
+    if __name__ == '__main__':
+        sols = nqueens_solver(n=6)
+        print(sols)
+        
 
 ..  reveal:: 81e7fe73-40ea-4835-a635-c4d9f843a2ce
     :showtitle: Solution

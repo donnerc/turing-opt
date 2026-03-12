@@ -144,7 +144,6 @@ occupant la colonne ``i``.
 
 ..  reveal:: 900da980-436e-46dd-9c64-988a22efb684
     :showtitle: Solution
-    :instructoronly:
 
     ..  code-block:: python
 
@@ -456,7 +455,6 @@ détermine si la solution ``q`` reçue en paramètre est admissible ou non.
 
 ..  reveal:: 6ea2c234-6514-4166-ac2f-77ff22b3c504
     :showtitle: Solution
-    :instructoronly:
 
     ..  code-block:: python
         :linenos:
