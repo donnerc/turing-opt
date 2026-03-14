@@ -74,7 +74,7 @@ utiliser d'opérateur logique (``or``). Tester ensuite votre code à l'aide de
 
 ..  reveal:: 1fce8cad-da1c-43bb-95fa-716fde2c68c6-solution
     :showtitle: Solution
-    :instructoronly:
+    
 
     ..  admonition:: Solution
 
@@ -158,7 +158,7 @@ ligne centrale ne change pas.
     
 ..  reveal:: ff9f6603-3aa4-4002-88c0-a38b9ae134e5
     :showtitle: Solution
-    :instructoronly:
+    
 
     On peut développer cette fonction en une seule ligne en utilisant
     judicieusement une liste en compréhension combinée avec une expression
@@ -236,7 +236,7 @@ colonne centrale ne change pas.
 
 ..  reveal:: d856a8ed-c858-46f9-8ac9-95b49c92261b
     :showtitle: Solution
-    :instructoronly:
+    
 
     ..  code-block:: python
 
@@ -283,7 +283,7 @@ ascendante de l'échiquier.
 
 ..  reveal:: 407762ba-33a0-4c49-8e64-0419a980ada7
     :showtitle: Solution
-    :instructoronly:
+    
 
     ..  code-block:: python
 
@@ -343,7 +343,7 @@ et effectue une rotation de 90° vers la droite de l'échiquier.
 ..  reveal:: 0903fe22-0e5f-4ad2-b76c-41f20d6197c6
     :showtitle: Solution
     :hidetitle: Cacher la solution
-    :instructoronly:
+    
 
     ..  code-block:: python
 
@@ -381,6 +381,53 @@ et effectue une rotation de 90° vers la droite de l'échiquier.
         if __name__ == '__main__':
             import doctest
             doctest.testmod()
+
+    On peut également programmer les deux symmétries en une seule fois en
+    observant que, lors d'une rotation à droite de 90°,
+
+    - Le numéro de colonne :math:`i` devient le numéro de ligne (depuis le
+      haut), à savoir que la dame de la colonne :math:`i` va vers la ligne
+      :math:`n-1-i`
+
+    - Le numéro de ligne d'une reine devient son numéro de colonne dans
+      l'échiquier tourné.
+
+    De ce fait, pour tout :math:`i`, on a 
+
+    ::
+
+        rotated_board[q[i]] = n - 1 - i
+
+    Cela permet d'obtenir le code suivant
+
+    ..  code-block:: python
+        :linenos:
+
+        type PartialChessboard = list[int | None]
+
+        def rotate(q: PartialChessboard) -> PartialChessboard:
+            '''
+            >>> rotate([2, 0, 3, 1])
+            [2, 0, 3, 1]
+            >>> rotate([2, None, 3, 1])
+            [None, 0, 3, 1]
+            >>> rotate([1, 3, 5, 0, 2, 4])
+            [2, 5, 1, 4, 0, 3]
+            >>> rotate([1, None, None, 0, 2, 4])
+            [2, 5, 1, None, 0, None]
+            >>> 
+            '''
+            n = len(q)
+            rotated: PartialChessboard = [None] * n
+            for i in range(n):
+                if q[i] is not None:
+                    rotated[q[i]] = n - 1 - i
+            return rotated
+
+        if __name__ == '__main__':
+            import doctest
+            doctest.testmod()
+
 
 
 Exercice 4
@@ -424,7 +471,6 @@ solutions obtenues et de la fonction ``hsymetry`` de l'exercice.
 
 ..  reveal:: session1-exo-break-axial-symmetry-solution
     :showtitle: Solution
-    :instructoronly:
 
     L'idée est d'imposer que la dame de la première colonne soit placée dans la
     moitié inférieure de l'échiquier. On peut rajouter cette contrainte dans la
@@ -618,7 +664,6 @@ doit être placée dans une colonne inférieure à 3.
 
 ..  reveal:: session1-exo-break-more-symmetry-solution
     :showtitle: Solution
-    :instructoronly:
 
     Pour ce faire, il faut rajouter les contraintes suivantes dans le ``dfs``:
 
@@ -650,6 +695,185 @@ doit être placée dans une colonne inférieure à 3.
     ..  activecode:: session1-exo-break-more-symmetry-solution-code
         :language: webtp
         :interpreterargs: branch=branch
+
+        import micropip
+        await micropip.install("https://raw.githubusercontent.com/donnerc/turing-modules/refs/heads/main/dist/turing-0.1.0-py3-none-any.whl")
+
+        from time import time
+
+        from collections.abc import Iterable
+        from gturtle import *
+
+        from turing.nqueens import draw_chess_board
+
+        type PartialChessboard = list[int | None]
+
+        def check_constraints(q: PartialChessboard, last_queen: int) -> bool:
+            '''
+            Vérifie que toutes les contraintes du problème soient satisfaites dans la
+            solution partielle ``q`` représentant la ligne sur laquelle est placée chaque dames
+            q[i]. L'indice ``last_queen`` représente la dernière reine posée.
+
+            >>> check_constraints([0], 0)
+            True
+            >>> check_constraints([1, 3, None, None], 1)
+            True
+            >>> check_constraints([1, None, None, None], 0)
+            True
+            >>> check_constraints([3, None, None, None], 0)
+            True
+            >>> check_constraints([1, 3, 5, 0, 2, 4], 5)
+            True
+            >>> check_constraints([1, 3, None, None], 1)
+            True
+
+            >>> check_constraints([0, 1, 2, 3], 3)
+            False
+            >>> check_constraints([3, 2, None, None], 1)
+            False
+            >>> check_constraints([2, 3, None, None], 1)
+            False
+            >>> check_constraints([1, 1, None, None, None], 1)
+            False
+
+            '''
+            j = last_queen
+            for i in range(j):
+                if q[i] == q[j]: return False
+                if q[i] - q[j] == i - j: return False
+                if q[j] - q[i] == i - j: return False
+
+            return True
+
+        def hsymmetry(q: PartialChessboard) -> PartialChessboard:
+            n = len(q)
+            return [(n-row -1) if row is not None else None for row in q]
+
+        def rotate(q: PartialChessboard) -> PartialChessboard:
+            '''
+            >>> rotate([2, 0, 3, 1])
+            [2, 0, 3, 1]
+            >>> rotate([2, None, 3, 1])
+            [None, 0, 3, 1]
+            >>> rotate([1, 3, 5, 0, 2, 4])
+            [2, 5, 1, 4, 0, 3]
+            >>> rotate([1, None, None, 0, 2, 4])
+            [2, 5, 1, None, 0, None]
+            >>>
+            '''
+            n = len(q)
+            rotated: PartialChessboard = [None] * n
+            for i in range(n):
+                if q[i] is not None:
+                    rotated[q[i]] = n - 1 - i
+            return rotated
+
+        def dfs(queens: PartialChessboard, index: int = 0, on_solution = None) -> None:
+            n = len(queens)
+            on_solution = on_solution or (lambda q: print(q))
+            if index == n:
+                # Si on parvient à une feuille, on tient une solution
+                # Attention à faire une copie de la liste `queens`
+                on_solution(queens[:])
+            else:
+                if index == 0:
+                    domain = range(0, (n + 1) // 2)
+                else:
+                    domain = range(n)
+
+                for i in domain:
+                    queens[index] = i
+                    # print("board", queens)
+
+                    if check_constraints(queens, index):
+
+                        # --- ÉLAGAGE DYNAMIQUE (ROTATIONS) ---
+
+                        # A. Contrainte sur la LIGNE 0 (Rotation 90°)
+                        # Si on pose une reine sur la ligne 0 à la colonne 'index',
+                        # cette colonne doit être >= à la ligne de la Col 0.
+                        if i == 0 and index < queens[0]:
+                            continue
+
+                        # B. Contrainte sur la DERNIÈRE LIGNE (Rotation 270°)
+                        # Si on pose une reine sur la ligne N-1, sa distance au bord droit
+                        # (N-1 - index) doit être >= à la ligne de la Col 0.
+                        if i == n - 1 and (n - 1 - index) < queens[0]:
+                            continue
+
+                        # C. Contrainte sur la DERNIÈRE COLONNE (Rotation 180°)
+                        # Si on est à la dernière colonne, sa distance au bord bas
+                        # (N-1 - ligne) doit être >= à la ligne de la Col 0.
+                        if index == n - 1 and (n - 1 - i) < queens[0]:
+                            continue
+
+                        dfs(queens, index=index + 1, on_solution=on_solution)
+
+
+
+        def nqueens_solver(n: int) -> None:
+            '''
+            Retourne toutes les solutions pour le problème des n dames
+
+            >>> nqueens_solver(n=1)
+            [[0]]
+            >>> nqueens_solver(n=2)
+            []
+            >>> nqueens_solver(n=3)
+            []
+            >>> nqueens_solver(n=4)
+            [[1, 3, 0, 2], [2, 0, 3, 1]]
+            >>> nqueens_solver(n=5)
+            [[0, 2, 4, 1, 3], [0, 3, 1, 4, 2], [1, 3, 0, 2, 4], [1, 4, 2, 0, 3], [2, 0, 3, 1, 4], [2, 4, 1, 3, 0], [3, 0, 2, 4, 1], [3, 1, 4, 2, 0], [4, 1, 3, 0, 2], [4, 2, 0, 3, 1]]
+            '''
+            def handle_solution(queens: list[int]) -> None:
+                solutions.append(queens)
+
+            queens = [None] * n
+            solutions = []
+
+            dfs(queens, on_solution=handle_solution)
+
+            return solutions
+
+        draw_solutions = False
+
+        if __name__ == '__main__':
+            t0 = time()
+            solutions = nqueens_solver(n=12)
+            t1 = time()
+            print(len(solutions))
+            print(solutions)
+            time = round(t1 - t0, 3)
+            print(f"Temps: {time = } secondes" )
+
+            # rotations
+            rotated_90 = [rotate(sol) for sol in solutions]
+            rotated_180 = [rotate(sol) for sol in rotated_90]
+            rotated_270 = [rotate(sol) for sol in rotated_180]
+
+            all_solutions = solutions + rotated_90 + rotated_180 + rotated_270
+
+            # générer les solutions symétriques
+            symmetric_solutions = [hsymmetry(sol) for sol in all_solutions]
+            print(len(symmetric_solutions))
+            
+
+            unique_solutions = set(tuple(sol) for sol in all_solutions + symmetric_solutions)
+            print("Solutions uniques", len(unique_solutions))
+            solutions = list(unique_solutions)
+
+            if draw_solutions:
+                x0, y0 = -300, -150
+                x, y, = x0, y0
+                for no, sol in enumerate(solutions):
+                    n, size = draw_chess_board(sol, x, y, size=30)
+                    setPos(x, y)
+                    if x < 400:
+                        x += n * size + 30
+                    else:
+                        x = x0
+                        y += n * size + 60
 
 
 
@@ -684,7 +908,7 @@ Exercice 6
 
     En plaçant les reines sur les lignes du milieu d'abord, on peut réduire le
     nombre de retours-arrière (backtracking) effectués par le programme pour
-    trouver les solutions.
+    trouver les premières solutions.
 
 Implémentez cette heuristique de placement en modifiant la fonction récursive
 ``dfs`` de la section :ref:`dfs-pruning.rst` pour qu'elle place les reines sur
@@ -708,12 +932,12 @@ sans heuristique de placement.
         def mid_first_order(n: int) -> list[int]:
             '''
             Return the values in a "mid-first" order.
-            >>> mid_first_order(4)
-            [2, 1, 3, 0]
-            >>> mid_first_order(5)
-            [2, 3, 1, 4, 0]
-            >>> mid_first_order(6)
-            [3, 2, 4, 1, 5, 0]
+            >>> list(mid_first_order(4)) in ([2, 1, 3, 0], [1, 2, 0, 3])
+            True
+            >>> list(mid_first_order(5)) in ([2, 3, 1, 4, 0], [2, 1, 3, 0, 4])
+            True
+            >>> list(mid_first_order(6)) in ([3, 2, 4, 1, 5, 0], [2, 3, 1, 4, 0, 5])
+            True
             '''
             ...
 
@@ -723,6 +947,26 @@ sans heuristique de placement.
     Intégrer ensuite cette fonction dans la fonction ``dfs`` pour qu'elle génère
     les placements des reines dans cet ordre de placement.
 
+..  reveal:: 4548807d-3042-43c2-b8c7-87e4dfd5da85
+    :showtitle: Indice 2
+
+    Essayez de révéler des motifs dans l'ordre généré, tel que
+
+    ..  figure:: figures/mid-first-order.png
+        :align: center
+        :width: 95%
+
+        Motifs dans l'ordre de placement des reines généré par la fonction
+        ``mid_first_order``.
+
+..  reveal:: 64b66d6c-d35c-44e8-8487-20247d1856f6
+    :showtitle: Indice 3
+
+    Pour compter le nombre de retours-arrière effectués par le programme, on peut
+    ajouter un compteur de retours-arrière dans la fonction ``dfs``. Un retour
+    arrière se produit lorsque la fonction ``check_constraints`` retourne ``False``
+    pour une configuration donnée.
+
 ..  activecode:: session1-exo-maxconflict-heuristic
     :language: webtp
     :interpreterargs: branch=branch
@@ -731,7 +975,6 @@ sans heuristique de placement.
 ..  reveal:: session1-exo-maxconflict-heuristic-solution
     :showtitle: Solution
     :hidetitle: Cacher la solution
-    :instructoronly:
 
     ..  admonition:: Solution
 
@@ -793,6 +1036,30 @@ sans heuristique de placement.
                         result.append(mid - (-1)**n * ((i + 2) // 2))
                 return result
 
+        On peut encore faire mieux (Merci Marc !!!), avec un ordre légèrement différent.
+
+        ..  code-block:: python
+
+            from collections.abc import Iterable
+
+            def mid_first_order(n: int) -> Iterable[int]:
+                '''
+                Return the values in a "mid-first" order.
+                >>> list(mid_first_order(4)) in ([2, 1, 3, 0], [1, 2, 0, 3])
+                True
+                >>> list(mid_first_order(5)) in ([2, 3, 1, 4, 0], [2, 1, 3, 0, 4])
+                True
+                >>> list(mid_first_order(6)) in ([3, 2, 4, 1, 5, 0], [2, 3, 1, 4, 0, 5])
+                True
+                '''
+                mid = n >> 1
+
+                for i in range(n):
+                    if i & 1:
+                        yield mid - ((i + 1) >> 1)
+                    else:
+                        yield mid + ((i + 1) >> 1)
+
         Il suffit ensuite d'intégrer cette fonction dans la fonction ``dfs``
         pour qu'elle génère les placements des reines dans cet ordre de
         placement:
@@ -816,7 +1083,6 @@ sans heuristique de placement.
 
 ..  reveal:: session1-exo-maxconflict-heuristic-solution-backtracking
     :showtitle: Solution (compter les retours-arrière)
-    :instructoronly:
 
     Pour compter le nombre de retours-arrière effectués par le programme, on peut
     ajouter un compteur de retours-arrière dans la fonction ``dfs``. Un retour
@@ -849,7 +1115,31 @@ sans heuristique de placement.
 
 ..  reveal:: session1-exo-maxconflict-heuristic-code-complet
     :showtitle: Solution (code complet)
-    :instructoronly:
+
+    Ce code permet de constater que l'heuristique de placement des reines sur
+    les lignes du milieu d'abord permet de réduire considérablement le nombre de
+    retours-arrière effectués par le programme pour trouver les solutions, en
+    particulier pour les grandes valeurs de :math:`n`.
+
+    ..  list-table:: Nombre de retours-arrière pour trouver les trois premières solutions pour :math:`n=8`
+        :header-rows: 1
+
+        * - Numéro de la solution trouvée
+          - Nombre de retours-arrière sans heuristique
+          - Nombre de retours-arrière avec heuristique
+
+        * - 0
+          - 868
+          - 76
+        
+        * - 1
+          - 1132
+          - 260
+
+        * - 2
+          - 1332
+          - 340
+
 
     ..  activecode:: session1-exo-maxconflict-heuristic-solution-code-complet
         :language: webtp
@@ -859,30 +1149,23 @@ sans heuristique de placement.
 
         from gturtle import *
 
-        def mid_first(values: list[int]) -> list[int]:
+        def mid_first_order(n: int) -> list[int]:
             '''
             Return the values in a "mid-first" order.
-            >>> mid_first([0, 1, 2, 3])
+            >>> mid_first_order(4)
             [2, 1, 3, 0]
-            >>> mid_first([0, 1, 2, 3, 4])
+            >>> mid_first_order(5)
             [2, 3, 1, 4, 0]
-            >>> mid_first([0, 1, 2, 3, 4, 5])
+            >>> mid_first_order(6)
             [3, 2, 4, 1, 5, 0]
             '''
-            n = len(values)
             mid = n // 2
             result = []
             for i in range(n):
-                if n % 2 == 1:
-                    if i % 2 == 0:
-                        result.append(values[mid - i // 2])
-                    else:
-                        result.append(values[mid + (i + 1) // 2])
+                if i % 2 == 0:
+                    result.append(mid + (-1)**n * (i // 2))
                 else:
-                    if i % 2 == 0:
-                        result.append(values[mid + i // 2])
-                    else:
-                        result.append(values[mid - (i + 2) // 2])
+                    result.append(mid - (-1)**n * ((i + 2) // 2))
             return result
 
         def draw_chess_board(solution: Iterable[int], x: int = 0, y: int = 0, size: int = 50, color="black") -> tuple[int, int]:
@@ -936,7 +1219,7 @@ sans heuristique de placement.
                 # Attention à faire une copie de la liste `queens`
                 on_solution(queens[:])
             else:
-                for i in range(n):
+                for i in mid_first_order(n):
                     queens[index] = i
                     # print("board", queens)
 
@@ -985,7 +1268,7 @@ sans heuristique de placement.
                     on_solution(queens[:])
                 else:
                     values = range(n)
-                    values = mid_first(list(range(n)))
+                    values = mid_first_order(n)
                     for i in values:
                         queens[index] = i
                         on_conflict(queens[:])

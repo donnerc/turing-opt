@@ -26,7 +26,11 @@ Techniques avancées en Python
     expression-booleennes.rst
     regles-eval-expressions-booleennes.rst
     chainage-operateurs-comparaison.rst
-    bitwise-operators    
+    bitwise-operators
+    advanced-functions.rst
+    decorators.rst
+    generators.rst
+    iterators.rst
 
 ..
     advanced-functions

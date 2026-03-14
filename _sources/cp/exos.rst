@@ -6,6 +6,356 @@ Exercices
 ..  contents:: Contenu de la page
     :depth: 3
 
+
+Ensembles de nombres entiers représentés par des nombres binaires
+=================================================================
+        
+On veut représenter des ensembles de nombres entiers compris entre 0 et
+:math:`n-1` (inclus) à l'aide de nombres binaire de :math:`n` bits. Par exemple,
+pour :math:`n=5`, on peut représenter l'ensemble :math:`\{0, 2, 4\}` par le
+nombre binaire :math:`10101` (en base 10, c'est le nombre 21).
+
+Exercice 1
+----------
+
+..  shortanswer:: bitwise_set_representation_question_01
+
+    Commencez par déterminer la représentation binaire des ensembles suivants:
+
+    1. :math:`\{0, 2, 4\}`
+    2. :math:`\{1, 3\}`
+    3. :math:`\emptyset` (l'ensemble vide)
+    4. :math:`\{0, 1, 2, 3, 4\}` (l'ensemble de tous les éléments)
+
+..  reveal:: b5d75b65-b352-494d-9d51-35a8e7d26000
+    :showtitle: Réponse
+
+    1. :math:`\{0, 2, 4\}` est représenté par le nombre binaire :math:`10101` (en base 10, c'est le nombre 21).
+    2. :math:`\{1, 3\}` est représenté par le nombre binaire :math:`01010` (en base 10, c'est le nombre 10).
+    3. :math:`\emptyset` (l'ensemble vide) est représenté par le nombre binaire :math:`00000` (en base 10, c'est le nombre 0).
+    4. :math:`\{0, 1, 2, 3, 4\}` (l'ensemble de tous les éléments) est
+       représenté par le nombre binaire :math:`11111` (en base 10, c'est le
+       nombre 31).
+
+Exercice 2
+----------
+
+Développez une fonction ``add_element(s: int, element: int) -> int`` qui prend
+en paramètre un nombre binaire ``s`` représentant un ensemble d'entiers et un
+entier ``element`` à ajouter à cet ensemble. La fonction doit retourner un
+nombre binaire représentant l'ensemble obtenu après l'ajout de l'élément.
+
+..  note:: 
+
+    La fonction doit être très efficace et ne doit pas utiliser de boucle ni de
+    conditionnelle. Elle doit faire le travail en une seule ligne de code, en
+    utilisant les opérateurs sur les bits.
+
+..  activecode:: bitwise_set_add_element.py
+    :language: webtp
+    :interpreterargs: layout=["Editor", "Console"]
+
+    def add_element(s: int, element: int) -> int:
+        ''' 
+        
+        Retourne un nombre binaire représentant l'ensemble obtenu après l'ajout de l'élément
+        
+        >>> add_element(0b10101, 1) # ajoute l'élément 1 à l'ensemble {0, 2, 4}
+        0b10111
+        >>> add_element(0b10101, 2) # ajoute l'élément 2 à l'ensemble {0, 2, 4}
+        0b10101
+        >>> add_element(0b10101, 3) # ajoute l'élément 3 à l'ensemble {0, 2, 4}
+        0b11101
+
+        '''
+        ...
+
+    if __name__ == '__main__':
+        import doctest
+        doctest.testmod()
+
+Exercice 3
+----------
+
+Développez une fonction ``remove_element(s: int, element: int) -> int`` qui prend
+en paramètre un nombre binaire ``s`` représentant un ensemble d'entiers et un
+entier ``element`` à retirer de cet ensemble. La fonction doit retourner un
+nombre binaire représentant l'ensemble obtenu après le retrait de l'élément.
+
+..  note:: 
+
+    La fonction doit être très efficace et ne doit pas utiliser de boucle ni de
+    conditionnelle. Elle doit faire le travail en une seule ligne de code, en
+    utilisant les opérateurs sur les bits.
+
+    Si l'élément à retirer n'est pas dans l'ensemble, la fonction doit lever une
+    exception de type ``ValueError`` avec le message "Element {element} is not
+    in the set represented by {s}".
+
+..  activecode:: bitwise_set_remove_element.py
+    :language: webtp
+    :interpreterargs: layout=["Editor", "Console"]
+
+    def remove_element(s: int, element: int) -> int:
+        ''' 
+        
+        Retourne un nombre binaire représentant l'ensemble obtenu après le retrait de l'élément
+        
+        >>> remove_element(0b10101, 0) # retire l'élément 0 de l'ensemble {0, 2, 4}
+        0b10100
+        >>> remove_element(0b10101, 2) # retire l'élément 2 de l'ensemble {0, 2, 4}
+        0b10001
+        >>> remove_element(0b10101, 3) # retire l'élément 3 de l'ensemble {0, 2, 4}
+        Traceback (most recent call last):
+        ...
+        ValueError: Element 3 is not in the set represented by 0b10101
+
+        '''
+        ...
+
+    if __name__ == '__main__':
+        import doctest
+        doctest.testmod()
+
+Exercice 4
+----------
+
+Développez une fonction ``has_element(s: int, element: int) -> bool`` qui prend
+en paramètre un nombre binaire ``s`` représentant un ensemble d'entiers et un
+entier ``element`` à vérifier. La fonction doit retourner ``True`` si l'élément
+est dans l'ensemble représenté par ``s``, et ``False`` sinon.
+
+..  note:: 
+
+    La fonction doit être très efficace et ne doit pas utiliser de boucle ni de
+    conditionnelle. Elle doit faire le travail en une seule ligne de code, en
+    utilisant les opérateurs sur les bits.
+
+..  activecode:: bitwise_set_has_element.py
+    :language: webtp
+    :interpreterargs: layout=["Editor", "Console"]
+
+    def has_element(s: int, element: int) -> bool:
+        ''' 
+        
+        Retourne True si l'élément est dans l'ensemble représenté par s, et False sinon
+        
+        >>> has_element(0b10101, 0) # vérifie si l'élément 0 est dans l'ensemble {0, 2, 4}
+        True
+        >>> has_element(0b10101, 1) # vérifie si l'élément 1 est dans l'ensemble {0, 2, 4}
+        False
+        >>> has_element(0b10101, 2) # vérifie si l'élément 2 est dans l'ensemble {0, 2, 4}
+        True
+        >>> has_element(0b10101, 3) # vérifie si l'élément 3 est dans l'ensemble {0, 2, 4}
+        False
+        >>> has_element(0b10101, 4) # vérifie si l'élément 4 est dans l'ensemble {0, 2, 4}
+        True
+
+        '''
+        ...
+
+    if __name__ == '__main__':
+        import doctest
+        doctest.testmod()
+
+Exercice 5
+----------
+
+Développez une fonction ``set_union(s1: int, s2: int) -> int`` qui prend en
+paramètre deux nombres binaires ``s1`` et ``s2`` représentant des ensembles d
+entiers et qui retourne un nombre binaire représentant l'union de ces deux
+ensembles.
+
+..  note:: 
+
+    La fonction doit être très efficace et ne doit pas utiliser de boucle ni de
+    conditionnelle. Elle doit faire le travail en une seule ligne de code, en
+    utilisant les opérateurs sur les bits.
+
+..  activecode:: bitwise_set_union.py
+    :language: webtp
+    :interpreterargs: layout=["Editor", "Console"]
+
+    def set_union(s1: int, s2: int) -> int:
+        ''' 
+        
+        Retourne un nombre binaire représentant l'union de ces deux ensembles
+        
+        >>> set_union(0b10101, 0b01010) # union de {0, 2, 4} et {1, 3}
+        0b11111
+        >>> set_union(0b10101, 0b00100) # union de {0, 2, 4} et {2}
+        0b10101
+        >>> set_union(0b10101, 0b00000) # union de {0, 2, 4} et l'ensemble vide
+        0b10101
+
+        '''
+        ...
+
+    if __name__ == '__main__':
+        import doctest
+        doctest.testmod()
+
+Exercice 6
+----------
+
+Développez une fonction ``set_intersection(s1: int, s2: int) -> int`` qui prend en
+paramètre deux nombres binaires ``s1`` et ``s2`` représentant des ensembles d
+entiers et qui retourne un nombre binaire représentant l'intersection de ces deux
+ensembles.
+
+..  note:: 
+
+    La fonction doit être très efficace et ne doit pas utiliser de boucle ni de
+    conditionnelle. Elle doit faire le travail en une seule ligne de code, en
+    utilisant les opérateurs sur les bits.
+
+..  activecode:: bitwise_set_intersection.py
+    :language: webtp
+    :interpreterargs: layout=["Editor", "Console"]
+
+    def set_intersection(s1: int, s2: int) -> int:
+        ''' 
+        
+        Retourne un nombre binaire représentant l'intersection de ces deux ensembles
+        
+        >>> set_intersection(0b10101, 0b01010) # intersection de {0, 2, 4} et {1, 3}
+        0b00000
+        >>> set_intersection(0b10101, 0b00100) # intersection de {0, 2, 4} et {2}
+        0b00100
+        >>> set_intersection(0b10101, 0b00000) # intersection de {0, 2, 4} et l'ensemble vide
+        0b00000
+
+        '''
+        ...
+
+    if __name__ == '__main__':
+        import doctest
+        doctest.testmod()
+
+Exercice 7
+----------
+
+Développez une fonction ``set_difference(s1: int, s2: int) -> int`` qui prend en
+paramètre deux nombres binaires ``s1`` et ``s2`` représentant des ensembles
+d'entiers et qui retourne un nombre binaire représentant la différence de ces
+deux ensembles (c'est à dire les éléments qui sont dans ``s1`` mais pas dans
+``s2``).
+
+..  note:: 
+
+    La fonction doit être très efficace et ne doit pas utiliser de boucle ni de
+    conditionnelle. Elle doit faire le travail en une seule ligne de code, en
+    utilisant les opérateurs sur les bits.
+
+..  activecode:: bitwise_set_difference.py
+    :language: webtp
+    :interpreterargs: layout=["Editor", "Console"]
+
+    def set_difference(s1: int, s2: int) -> int:
+        ''' 
+        
+        Retourne un nombre binaire représentant la différence de ces deux ensembles
+        
+        >>> set_difference(0b10101, 0b01010) # différence de {0, 2, 4} et {1, 3}
+        0b10101
+        >>> set_difference(0b10101, 0b00100) # différence de {0, 2, 4} et {2}
+        0b10001
+        >>> set_difference(0b10101, 0b10101) # différence de {0, 2, 4} et {0, 2, 4}
+        0b00000
+        >>> set_difference(0b11111, 0b10101) # différence de {0, 1, 2, 3, 4} et {0, 2, 4}
+        0b01010
+        >>> set_difference(0b10101, 0b00000) # différence de {0, 2, 4} et l'ensemble vide
+        0b10101
+
+        '''
+        ...
+
+    if __name__ == '__main__':
+        import doctest
+        doctest.testmod()
+
+Exercice 8
+----------
+
+Développez une fonction ``set_min(s: int) -> int`` qui prend en paramètre un
+nombre binaire ``s`` représentant un ensemble d'entiers et qui retourne le plus
+petit élément de cet ensemble. Si l'ensemble est vide, la fonction doit lever
+une exception de type ``ValueError`` avec le message "The set represented by {s}
+is empty".
+
+..  note:: 
+
+    La fonction doit être très efficace et ne doit pas utiliser de boucle ni de
+    conditionnelle. Elle doit faire le travail en une seule ligne de code, en
+    utilisant les opérateurs sur les bits.
+
+..  activecode:: bitwise_set_min.py
+    :language: webtp
+    :interpreterargs: layout=["Editor", "Console"]
+
+    def set_min(s: int) -> int:
+        ''' 
+        
+        Retourne le plus petit élément de l'ensemble représenté par s
+        
+        >>> set_min(0b10101) # plus petit élément de {0, 2, 4}
+        0
+        >>> set_min(0b01010) # plus petit élément de {1, 3}
+        1
+        >>> set_min(0b00000) # plus petit élément de l'ensemble vide
+        Traceback (most recent call last):
+        ...
+        ValueError: The set represented by 0b00000 is empty
+
+        '''
+        ...
+
+    if __name__ == '__main__':
+        import doctest
+        doctest.testmod()
+
+Exercice 9
+----------
+
+Développez une fonction ``set_max(s: int) -> int`` qui prend en paramètre un
+nombre binaire ``s`` représentant un ensemble d'entiers et qui retourne le plus
+grand élément de cet ensemble. Si l'ensemble est vide, la fonction doit lever
+une exception de type ``ValueError`` avec le message "The set represented by {s}
+is empty".
+
+..  note:: 
+
+    La fonction doit être très efficace et ne doit pas utiliser de boucle ni de
+    conditionnelle. Elle doit faire le travail en une seule ligne de code, en
+    utilisant les opérateurs sur les bits.
+
+..  activecode:: bitwise_set_max.py
+    :language: webtp
+    :interpreterargs: layout=["Editor", "Console"]
+
+    def set_max(s: int) -> int:
+        ''' 
+        
+        Retourne le plus grand élément de l'ensemble représenté par s
+        
+        >>> set_max(0b10101) # plus grand élément de {0, 2, 4}
+        4
+        >>> set_max(0b01010) # plus grand élément de {1, 3}
+        3
+        >>> set_max(0b00000) # plus grand élément de l'ensemble vide
+        Traceback (most recent call last):
+        ...
+        ValueError: The set represented by 0b00000 is empty
+
+        '''
+        ...
+
+    if __name__ == '__main__':
+        import doctest
+        doctest.testmod()
+
+        
+
 Résolution de Sudoku
 ====================
 

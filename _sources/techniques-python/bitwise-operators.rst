@@ -404,7 +404,7 @@ Indiquez ce qu'affiche le programme suivant
 
     ::
         
-        print(20 & 4)
+        print(20 & (1 << 2))
 
 ..  reveal:: 08685b6b-7d2c-41e4-845e-05721f8454c0
     :showtitle: Réponse
@@ -1030,9 +1030,9 @@ Exercice 6
         7
         >>> n = 12324
         >>> min_bits(2 ** n - 1)
-        n
+        12324
         >>> min_bits(2 ** n)
-        n + 1
+        12325
         '''
         ...
 
@@ -1096,7 +1096,3 @@ Exercice 6
 
             n >>= 1
 
-
-        
-Exercice 7
-----------
