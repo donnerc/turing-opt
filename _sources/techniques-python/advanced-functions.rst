@@ -6,6 +6,11 @@ Fonctions avancées
 ..  contents:: Contenu de la page
     :depth: 3
 
+..  youtube:: ZA_zbYTNIRY
+    :width: 800
+    :height: 450
+    :divid: visually-explained-args-kwargs
+
 Définir des fonctions très flexibles 
 ====================================
 
