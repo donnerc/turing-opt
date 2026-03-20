@@ -49,6 +49,10 @@ préparation du thé a pris. Nous allons utiliser un décorateur pour cela.
         time.sleep(2)
         print("Matcha is ready!")
 
+    brew_tea()
+    make_matcha()
+
+
 Le comportement souhaité
 ------------------------
 
@@ -325,29 +329,63 @@ décorateurs sans paramètres.
 Méthode générique pour décorer des fonctions
 ============================================
 
+Exemple : caching des résultats d'une fonction
+----------------------------------------------
+
+L'exemple suivant montre comment créer un décorateur avec paramètre qui retourne
+le résultat de la fonction décorée et qui cache les résultats pour éviter de
+refaire le travail si la fonction est appelée à nouveau avec les mêmes arguments.
+
+..  note::
+
+    Le décorateur ``wraps`` de la bibliothèque standard permet de conserver le
+    nom et la docstring de la fonction décorée, ce qui est important pour le
+    débogage et la documentation.
+
+    Eh oui ... on utilise un décorateur pour créer un décorateur 🤯 ! C'est un
+    bon exemple de la puissance des décorateurs 🚀.
+
 ..  activecode:: decorators-generic-syntax
     :language: webtp
     :interpreterargs: layout=["Editor", "Console"]
 
     from functools import wraps
 
-    def repetiter(nb_fois): # Niveau 1 : Reçoit les paramètres du décorateur
-        def decorateur(fonction): # Niveau 2 : Le décorateur classique (reçoit la fonction)
-            @wraps(fonction)
+    def cache(maxsize: int = None): # Niveau 1 : Reçoit les paramètres du décorateur
+        cached_results = {}
+        def decorateur(function): # Niveau 2 : Le décorateur classique (reçoit la fonction)
+            @wraps(function) # Permet de conserver le nom et la docstring de la fonction décorée
             def wrapper(*args, **kwargs): # Niveau 3 : L'exécution (reçoit les arguments de la fonction)
-                resultat = None
-                for _ in range(nb_fois):
-                    print(f"Exécution de {fonction.__name__}...")
-                    resultat = fonction(*args, **kwargs)
-                return resultat
+                
+                # On crée une clé à partir des arguments pour stocker le résultat dans le cache
+                key = (args, frozenset(kwargs.items())) 
+                
+                # Ne pas refaire le travail si le résultat est déjà dans le cache
+                if key in cached_results:
+                    return cached_results[key]
+                
+                # Sinon, on exécute la fonction et on stocke le résultat dans le cache
+                result = function(*args, **kwargs)
+
+                # Ne pas dépasser la taille maximale du cache si elle est définie
+                if maxsize is None or len(cached_results) < maxsize:
+                    cached_results[key] = result
+
+                # Le décorateur retourne le résultat de la fonction décorée
+                return result
+            
+            # Le décorateur retourne la fonction wrapper qui contient la logique de cache
             return wrapper
         return decorateur
 
-    @repetiter(nb_fois=3)
-    def saluer(nom):
-        print(f"Bonjour {nom} !")
+    @cache(maxsize=1000)
+    def fib(n: int) -> int:
+        if n <= 1:
+            return n
+        return fib(n - 1) + fib(n - 2)
+        
 
-    saluer("Alice")
+    fib(10)
 
 Vidéo plus technique sur les décorateurs
 ========================================
