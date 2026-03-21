@@ -18,6 +18,7 @@ La visualisation ci-dessous permet de comprendre le fonctionnement du solveur
 
 ..  activecode:: nqueens_cp_visu
     :language: webtp
+    :interpreterargs: branch=branch
 
     ######################## Importation dans WebTigerPython ############
     from pyodide.http import open_url
@@ -361,8 +362,7 @@ dans les domaines des variables non assignées).
     résolution (solution trouvée, inconsistence, propagation, application du
     point fixe, ...). Ces méthodes permettent notamment d'implémenter le
     mécanisme d'enregistrement de fonction de gestion des événements avec le
-    décorateur ``@on(<event>)`` et utilisent des aspects de Python que vous ne
-    connaissez probablement pas. La compréhension détaillée de ces méthodes
+    décorateur ``@on(<event>)``. La compréhension détaillée de ces méthodes
     n'est pas importante pour comprendre le fonctionnement général de la classe
     ``ToyCSP``.
 
