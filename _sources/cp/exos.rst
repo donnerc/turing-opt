@@ -9,11 +9,12 @@ Exercices
 
 Ensembles de nombres entiers représentés par des nombres binaires
 =================================================================
-        
-On veut représenter des ensembles de nombres entiers compris entre 0 et
-:math:`n-1` (inclus) à l'aide de nombres binaire de :math:`n` bits. Par exemple,
-pour :math:`n=5`, on peut représenter l'ensemble :math:`\{0, 2, 4\}` par le
-nombre binaire :math:`10101` (en base 10, c'est le nombre 21).
+
+Il existe une manière très efficace de représenter des ensembles de nombres
+entiers compris entre 0 et :math:`n-1` (inclus) à l'aide de nombres binaires de
+:math:`n` bits. Par exemple, pour :math:`n=5`, on peut représenter l'ensemble
+:math:`\{0, 2, 4\}` par le nombre binaire :math:`10101` (en base 10, c'est le
+nombre 21).
 
 Exercice 1
 ----------
@@ -55,17 +56,94 @@ nombre binaire représentant l'ensemble obtenu après l'ajout de l'élément.
     :language: webtp
     :interpreterargs: layout=["Editor", "Console"]
 
-    def add_element(s: int, element: int) -> int:
+    type BitSet = int
+
+    def add_element(s: BitSet, element: int) -> BitSet:
         ''' 
         
-        Retourne un nombre binaire représentant l'ensemble obtenu après l'ajout de l'élément
+        Retourne un nombre binaire représentant l'ensemble obtenu après l'ajout
+        de l'élément
         
-        >>> add_element(0b10101, 1) # ajoute l'élément 1 à l'ensemble {0, 2, 4}
-        0b10111
-        >>> add_element(0b10101, 2) # ajoute l'élément 2 à l'ensemble {0, 2, 4}
-        0b10101
-        >>> add_element(0b10101, 3) # ajoute l'élément 3 à l'ensemble {0, 2, 4}
-        0b11101
+        >>> add_element(0b10101, 1) == 0b10111
+        True
+        >>> add_element(0b10101, 2) == 0b10101
+        True
+        >>> add_element(0b10101, 3) == 0b11101
+        True
+        
+        '''
+        ...
+
+    if __name__ == '__main__':
+        import doctest
+        doctest.testmod()
+
+..  reveal:: bitwise_set_add_element_solution
+    :showtitle: Solution
+    :hidetitle: Cacher
+    :instructoronly:
+
+    La fonction peut être implémentée en utilisant l'opérateur de bitwise OR
+    (``|``) pour ajouter l'élément à l'ensemble représenté par le nombre
+    binaire. Voici une solution:
+
+    ..  activecode:: a3328a41-5028-495d-9742-e3c1f50b84f3
+        :language: webtp
+        :interpreterargs: layout=["Editor", "Console"]
+
+        type BitSet = int
+
+        def add_element(s: BitSet, element: int) -> BitSet:
+            ''' 
+            
+            Retourne un nombre binaire représentant l'ensemble obtenu après l'ajout
+            de l'élément
+            
+            >>> add_element(0b10101, 1) == 0b10111
+            True
+            >>> add_element(0b10101, 2) == 0b10101
+            True
+            >>> add_element(0b10101, 3) == 0b11101
+            True
+            
+            '''
+            return s | (1 << element)
+
+        if __name__ == '__main__':
+            import doctest
+            doctest.testmod()
+
+Exercice 3
+----------
+
+Développez une fonction ``union(s1: BitSet, s2: BitSet) -> BitSet`` qui
+prend en paramètre deux nombres binaires ``s1`` et ``s2`` représentant des
+ensembles d entiers et qui retourne un nombre binaire représentant l'union de
+ces deux ensembles.
+
+..  note:: 
+
+    La fonction doit être très efficace et ne doit pas utiliser de boucle ni de
+    conditionnelle. Elle doit faire le travail en une seule ligne de code, en
+    utilisant les opérateurs sur les bits.
+
+..  activecode:: bitwise_set_union.py
+    :language: webtp
+    :interpreterargs: layout=["Editor", "Console"]
+
+    type BitSet = int
+
+    def union(s1: BitSet, s2: BitSet) -> BitSet:
+        ''' 
+        
+        Retourne un nombre binaire représentant l'union de ces deux ensembles
+        
+        >>> union(0b10101, 0b01010) == 0b11111
+        True
+        >>> union(0b10101, 0b00100) == 0b10101
+        True
+        >>> union(0b10101, 0b00000) == 0b10101
+        True
 
         '''
         ...
@@ -74,13 +152,196 @@ nombre binaire représentant l'ensemble obtenu après l'ajout de l'élément.
         import doctest
         doctest.testmod()
 
-Exercice 3
+..  reveal:: bitwise_set_union_solution
+    :showtitle: Solution
+    :hidetitle: Cacher
+    :instructoronly:
+
+    La fonction peut être implémentée en utilisant l'opérateur de bitwise OR
+    (``|``) pour calculer l'union des deux ensembles représentés par les nombres
+    binaires. Voici la solution:
+
+    ..  activecode:: 4bee3b74-714c-4109-8e29-5f280c9110ca
+        :language: webtp
+        :interpreterargs: layout=["Editor", "Console"]
+
+        type BitSet = int
+
+        def union(s1: BitSet, s2: BitSet) -> BitSet:
+            ''' 
+            
+            Retourne un nombre binaire représentant l'union de ces deux ensembles
+            
+            >>> union(0b10101, 0b01010) == 0b11111
+            True
+            >>> union(0b10101, 0b00100) == 0b10101
+            True
+            >>> union(0b10101, 0b00000) == 0b10101
+            True
+
+            '''
+            return s1 | s2
+
+Exercice 4
 ----------
 
-Développez une fonction ``remove_element(s: int, element: int) -> int`` qui prend
-en paramètre un nombre binaire ``s`` représentant un ensemble d'entiers et un
-entier ``element`` à retirer de cet ensemble. La fonction doit retourner un
-nombre binaire représentant l'ensemble obtenu après le retrait de l'élément.
+Développez une fonction ``intersection(s1: BitSet, s2: BitSet) -> BitSet``
+qui prend en paramètre deux nombres binaires ``s1`` et ``s2`` représentant des
+ensembles d entiers et qui retourne un nombre binaire représentant
+l'intersection de ces deux ensembles.
+
+..  note:: 
+
+    La fonction doit être très efficace et ne doit pas utiliser de boucle ni de
+    conditionnelle. Elle doit faire le travail en une seule ligne de code, en
+    utilisant les opérateurs sur les bits.
+
+..  activecode:: bitwise_set_intersection.py
+    :language: webtp
+    :interpreterargs: layout=["Editor", "Console"]
+
+    type BitSet = int
+
+    def intersection(s1: BitSet, s2: BitSet) -> BitSet:
+        ''' 
+        
+        Retourne un nombre binaire représentant l'intersection de ces deux
+        ensembles
+        
+        >>> intersection(0b10101, 0b01010) == 0b00000
+        True
+        >>> intersection(0b10101, 0b00100) == 0b00100
+        True
+        >>> intersection(0b10101, 0b00000) == 0b00000
+        True
+
+        '''
+        ...
+
+    if __name__ == '__main__':
+        import doctest
+        doctest.testmod()
+
+..  reveal:: bitwise_set_intersection_solution
+    :showtitle: Solution
+    :hidetitle: Cacher
+    :instructoronly:
+
+    La fonction peut être implémentée en utilisant l'opérateur de bitwise AND
+    (``&``) pour calculer l'intersection des deux ensembles représentés par les
+    nombres binaires. Voici la solution:
+
+    ..  activecode:: fd23c785-7660-4af5-ae27-92dee287384c
+        :language: webtp
+        :interpreterargs: layout=["Editor", "Console"]
+
+        type BitSet = int
+
+        def intersection(s1: BitSet, s2: BitSet) -> BitSet:
+            ''' 
+            
+            Retourne un nombre binaire représentant l'intersection de ces deux
+            ensembles
+            
+            >>> intersection(0b10101, 0b01010) == 0b00000
+            True
+            >>> intersection(0b10101, 0b00100) == 0b00100
+            True
+            >>> intersection(0b10101, 0b00000) == 0b00000
+            True
+
+            '''
+            return s1 & s2
+
+
+Exercice 5
+----------
+
+Développez une fonction ``difference(s1: BitSet, s2: BitSet) -> BitSet`` qui
+prend en paramètre deux nombres binaires ``s1`` et ``s2`` représentant des
+ensembles d'entiers et qui retourne un nombre binaire représentant la différence
+de ces deux ensembles (c'est à dire les éléments qui sont dans ``s1`` mais pas
+dans ``s2``).
+
+..  note:: 
+
+    La fonction doit être très efficace et ne doit pas utiliser de boucle ni de
+    conditionnelle. Elle doit faire le travail en une seule ligne de code, en
+    utilisant les opérateurs sur les bits.
+
+..  activecode:: bitwise_set_difference.py
+    :language: webtp
+    :interpreterargs: layout=["Editor", "Console"]
+
+    type BitSet = int
+
+    def difference(s1: BitSet, s2: BitSet) -> BitSet:
+        ''' 
+        
+        Retourne un nombre binaire représentant la différence de ces deux
+        ensembles
+        
+        >>> difference(0b10101, 0b01010) == 0b10101
+        True
+        >>> difference(0b10101, 0b00100) == 0b10001
+        True
+        >>> difference(0b10101, 0b10101) == 0b00000
+        True
+        >>> difference(0b11111, 0b10101) == 0b01010
+        True
+        >>> difference(0b10101, 0b00000) == 0b10101
+        True
+
+        '''
+        ...
+
+    if __name__ == '__main__':
+        import doctest
+        doctest.testmod()
+
+..  reveal:: bitwise_set_difference_solution
+    :showtitle: Solution
+    :hidetitle: Cacher
+    :instructoronly:
+
+    La fonction peut être implémentée en utilisant l'opérateur de bitwise AND
+    (``&``) avec le complément de ``s2`` pour calculer la différence des deux
+    ensembles représentés par les nombres binaires. Voici la solution:
+
+    ..  activecode:: cdf359d6-eee9-4c1a-a889-2101fd1b1e1c
+        :language: webtp
+        :interpreterargs: layout=["Editor", "Console"]
+
+        type BitSet = int
+
+        def difference(s1: BitSet, s2: BitSet) -> BitSet:
+            ''' 
+            
+            Retourne un nombre binaire représentant la différence de ces deux
+            ensembles
+            
+            >>> difference(0b10101, 0b01010) == 0b10101
+            True
+            >>> difference(0b10101, 0b00100) == 0b10001
+            True
+            >>> difference(0b10101, 0b10101) == 0b00000
+            True
+            >>> difference(0b11111, 0b10101) == 0b01010
+            True
+            >>> difference(0b10101, 0b00000) == 0b10101
+            True
+
+            '''
+            return s1 & ~s2
+
+Exercice 6
+----------
+
+Développez une fonction ``remove_element(s: BitSet, element: int) -> BitSet``
+qui prend en paramètre un nombre binaire ``s`` représentant un ensemble
+d'entiers et un entier ``element`` à retirer de cet ensemble. La fonction doit
+retourner un nombre binaire représentant l'ensemble obtenu après le retrait de
+l'élément.
 
 ..  note:: 
 
@@ -96,16 +357,19 @@ nombre binaire représentant l'ensemble obtenu après le retrait de l'élément.
     :language: webtp
     :interpreterargs: layout=["Editor", "Console"]
 
-    def remove_element(s: int, element: int) -> int:
+    type BitSet = int
+
+    def remove_element(s: BitSet, element: int) -> BitSet:
         ''' 
         
-        Retourne un nombre binaire représentant l'ensemble obtenu après le retrait de l'élément
+        Retourne un nombre binaire représentant l'ensemble obtenu après le
+        retrait de l'élément
         
-        >>> remove_element(0b10101, 0) # retire l'élément 0 de l'ensemble {0, 2, 4}
-        0b10100
-        >>> remove_element(0b10101, 2) # retire l'élément 2 de l'ensemble {0, 2, 4}
-        0b10001
-        >>> remove_element(0b10101, 3) # retire l'élément 3 de l'ensemble {0, 2, 4}
+        >>> remove_element(0b10101, 0) == 0b10100
+        True
+        >>> remove_element(0b10101, 2) == 0b10001
+        True
+        >>> remove_element(0b10101, 3)
         Traceback (most recent call last):
         ...
         ValueError: Element 3 is not in the set represented by 0b10101
@@ -117,7 +381,46 @@ nombre binaire représentant l'ensemble obtenu après le retrait de l'élément.
         import doctest
         doctest.testmod()
 
-Exercice 4
+..  reveal:: bitwise_set_remove_element_solution
+    :showtitle: Solution
+    :hidetitle: Cacher
+    :instructoronly:
+
+    La fonction peut être implémentée en utilisant l'opérateur de bitwise AND
+    (``&``) avec le complément de l'élément à retirer pour supprimer l'élément
+    de l'ensemble représenté par le nombre binaire. Voici la solution:
+
+    ..  activecode:: 1e81d1f9-0b6b-4980-bdfa-1e8418779a16
+        :language: webtp
+        :interpreterargs: layout=["Editor", "Console"]
+
+        type BitSet = int
+
+        def remove_element(s: BitSet, element: int) -> BitSet:
+            ''' 
+            
+            Retourne un nombre binaire représentant l'ensemble obtenu après le
+            retrait de l'élément
+            
+            >>> remove_element(0b10101, 0) == 0b10100
+            True
+            >>> remove_element(0b10101, 2) == 0b10001
+            True
+            >>> remove_element(0b10101, 3)
+            Traceback (most recent call last):
+            ...
+            ValueError: Element 3 is not in the set represented by 0b10101
+
+            '''
+            if not (s & (1 << element)):
+                raise ValueError(f"Element {element} is not in the set represented by {s:#b}")
+            return s & ~(1 << element)
+
+        if __name__ == '__main__':
+            import doctest
+            doctest.testmod()
+
+Exercice 7
 ----------
 
 Développez une fonction ``has_element(s: int, element: int) -> bool`` qui prend
@@ -135,20 +438,23 @@ est dans l'ensemble représenté par ``s``, et ``False`` sinon.
     :language: webtp
     :interpreterargs: layout=["Editor", "Console"]
 
-    def has_element(s: int, element: int) -> bool:
+    type BitSet = int
+
+    def has_element(s: BitSet, element: int) -> bool:
         ''' 
         
-        Retourne True si l'élément est dans l'ensemble représenté par s, et False sinon
+        Retourne True si l'élément est dans l'ensemble représenté par s, et
+        False sinon
         
-        >>> has_element(0b10101, 0) # vérifie si l'élément 0 est dans l'ensemble {0, 2, 4}
+        >>> has_element(0b10101, 0)
         True
-        >>> has_element(0b10101, 1) # vérifie si l'élément 1 est dans l'ensemble {0, 2, 4}
+        >>> has_element(0b10101, 1)
         False
-        >>> has_element(0b10101, 2) # vérifie si l'élément 2 est dans l'ensemble {0, 2, 4}
+        >>> has_element(0b10101, 2)
         True
-        >>> has_element(0b10101, 3) # vérifie si l'élément 3 est dans l'ensemble {0, 2, 4}
+        >>> has_element(0b10101, 3)
         False
-        >>> has_element(0b10101, 4) # vérifie si l'élément 4 est dans l'ensemble {0, 2, 4}
+        >>> has_element(0b10101, 4)
         True
 
         '''
@@ -158,130 +464,53 @@ est dans l'ensemble représenté par ``s``, et ``False`` sinon.
         import doctest
         doctest.testmod()
 
-Exercice 5
-----------
+..  reveal:: bitwise_set_has_element_solution
+    :showtitle: Solution
+    :hidetitle: Cacher
+    :instructoronly:
 
-Développez une fonction ``set_union(s1: int, s2: int) -> int`` qui prend en
-paramètre deux nombres binaires ``s1`` et ``s2`` représentant des ensembles d
-entiers et qui retourne un nombre binaire représentant l'union de ces deux
-ensembles.
+    La fonction peut être implémentée en utilisant l'opérateur de bitwise AND
+    (``&``) pour vérifier si l'élément est dans l'ensemble représenté par le
+    nombre binaire. Voici la solution:
 
-..  note:: 
+    ..  activecode:: 236fc0c3-cd47-4bed-9131-9dc49e799457
+        :language: webtp
+        :interpreterargs: layout=["Editor", "Console"]
 
-    La fonction doit être très efficace et ne doit pas utiliser de boucle ni de
-    conditionnelle. Elle doit faire le travail en une seule ligne de code, en
-    utilisant les opérateurs sur les bits.
+        type BitSet = int
 
-..  activecode:: bitwise_set_union.py
-    :language: webtp
-    :interpreterargs: layout=["Editor", "Console"]
+        def has_element(s: BitSet, element: int) -> bool:
+            ''' 
+            
+            Retourne True si l'élément est dans l'ensemble représenté par s, et
+            False sinon
+            
+            >>> has_element(0b10101, 0)
+            True
+            >>> has_element(0b10101, 1)
+            False
+            >>> has_element(0b10101, 2)
+            True
+            >>> has_element(0b10101, 3)
+            False
+            >>> has_element(0b10101, 4)
+            True
 
-    def set_union(s1: int, s2: int) -> int:
-        ''' 
-        
-        Retourne un nombre binaire représentant l'union de ces deux ensembles
-        
-        >>> set_union(0b10101, 0b01010) # union de {0, 2, 4} et {1, 3}
-        0b11111
-        >>> set_union(0b10101, 0b00100) # union de {0, 2, 4} et {2}
-        0b10101
-        >>> set_union(0b10101, 0b00000) # union de {0, 2, 4} et l'ensemble vide
-        0b10101
+            '''
+            return (s & (1 << element)) != 0
 
-        '''
-        ...
-
-    if __name__ == '__main__':
-        import doctest
-        doctest.testmod()
-
-Exercice 6
-----------
-
-Développez une fonction ``set_intersection(s1: int, s2: int) -> int`` qui prend en
-paramètre deux nombres binaires ``s1`` et ``s2`` représentant des ensembles d
-entiers et qui retourne un nombre binaire représentant l'intersection de ces deux
-ensembles.
-
-..  note:: 
-
-    La fonction doit être très efficace et ne doit pas utiliser de boucle ni de
-    conditionnelle. Elle doit faire le travail en une seule ligne de code, en
-    utilisant les opérateurs sur les bits.
-
-..  activecode:: bitwise_set_intersection.py
-    :language: webtp
-    :interpreterargs: layout=["Editor", "Console"]
-
-    def set_intersection(s1: int, s2: int) -> int:
-        ''' 
-        
-        Retourne un nombre binaire représentant l'intersection de ces deux ensembles
-        
-        >>> set_intersection(0b10101, 0b01010) # intersection de {0, 2, 4} et {1, 3}
-        0b00000
-        >>> set_intersection(0b10101, 0b00100) # intersection de {0, 2, 4} et {2}
-        0b00100
-        >>> set_intersection(0b10101, 0b00000) # intersection de {0, 2, 4} et l'ensemble vide
-        0b00000
-
-        '''
-        ...
-
-    if __name__ == '__main__':
-        import doctest
-        doctest.testmod()
-
-Exercice 7
-----------
-
-Développez une fonction ``set_difference(s1: int, s2: int) -> int`` qui prend en
-paramètre deux nombres binaires ``s1`` et ``s2`` représentant des ensembles
-d'entiers et qui retourne un nombre binaire représentant la différence de ces
-deux ensembles (c'est à dire les éléments qui sont dans ``s1`` mais pas dans
-``s2``).
-
-..  note:: 
-
-    La fonction doit être très efficace et ne doit pas utiliser de boucle ni de
-    conditionnelle. Elle doit faire le travail en une seule ligne de code, en
-    utilisant les opérateurs sur les bits.
-
-..  activecode:: bitwise_set_difference.py
-    :language: webtp
-    :interpreterargs: layout=["Editor", "Console"]
-
-    def set_difference(s1: int, s2: int) -> int:
-        ''' 
-        
-        Retourne un nombre binaire représentant la différence de ces deux ensembles
-        
-        >>> set_difference(0b10101, 0b01010) # différence de {0, 2, 4} et {1, 3}
-        0b10101
-        >>> set_difference(0b10101, 0b00100) # différence de {0, 2, 4} et {2}
-        0b10001
-        >>> set_difference(0b10101, 0b10101) # différence de {0, 2, 4} et {0, 2, 4}
-        0b00000
-        >>> set_difference(0b11111, 0b10101) # différence de {0, 1, 2, 3, 4} et {0, 2, 4}
-        0b01010
-        >>> set_difference(0b10101, 0b00000) # différence de {0, 2, 4} et l'ensemble vide
-        0b10101
-
-        '''
-        ...
-
-    if __name__ == '__main__':
-        import doctest
-        doctest.testmod()
+        if __name__ == '__main__':
+            import doctest
+            doctest.testmod()        
 
 Exercice 8
 ----------
 
-Développez une fonction ``set_min(s: int) -> int`` qui prend en paramètre un
+Développez une fonction ``set_min(s: BitSet) -> int`` qui prend en paramètre un
 nombre binaire ``s`` représentant un ensemble d'entiers et qui retourne le plus
 petit élément de cet ensemble. Si l'ensemble est vide, la fonction doit lever
-une exception de type ``ValueError`` avec le message "The set represented by {s}
-is empty".
+une exception de type ``ValueError`` avec le message "Cannot get the minimum of
+an empty set".
 
 ..  note:: 
 
@@ -293,19 +522,21 @@ is empty".
     :language: webtp
     :interpreterargs: layout=["Editor", "Console"]
 
-    def set_min(s: int) -> int:
+    type BitSet = int
+
+    def set_min(s: BitSet) -> int:
         ''' 
         
         Retourne le plus petit élément de l'ensemble représenté par s
         
-        >>> set_min(0b10101) # plus petit élément de {0, 2, 4}
+        >>> set_min(0b10101)
         0
-        >>> set_min(0b01010) # plus petit élément de {1, 3}
+        >>> set_min(0b01010)
         1
-        >>> set_min(0b00000) # plus petit élément de l'ensemble vide
+        >>> set_min(0b00000)
         Traceback (most recent call last):
         ...
-        ValueError: The set represented by 0b00000 is empty
+        ValueError: Cannot get the minimum of an empty set
 
         '''
         ...
@@ -314,14 +545,49 @@ is empty".
         import doctest
         doctest.testmod()
 
+..  reveal:: bitwise_set_min_solution
+    :showtitle: Solution
+    :hidetitle: Cacher
+    :instructoronly:
+
+    La fonction peut être implémentée en utilisant l'opérateur de bitwise AND
+    (``&``) avec le complément de ``s`` pour trouver le plus petit élément dans
+    l'ensemble représenté par le nombre binaire. Voici la solution:
+
+    ..  activecode:: 1f96778d-fa8f-4a87-9f74-a3a9a269bed1
+        :language: webtp
+        :interpreterargs: layout=["Editor", "Console"]
+
+        type BitSet = int
+
+        def set_min(s: BitSet) -> int:
+            ''' 
+            
+            Retourne le plus petit élément de l'ensemble représenté par s
+            
+            >>> set_min(0b10101)
+            0
+            >>> set_min(0b01010)
+            1
+            >>> set_min(0b00000)
+            Traceback (most recent call last):
+            ...
+            ValueError: Cannot get the minimum of an empty set
+
+            '''
+            if s == 0:
+                raise ValueError(f"Cannot get the minimum of an empty set")
+            return (s & -s).bit_length() - 1
+
+
 Exercice 9
 ----------
 
-Développez une fonction ``set_max(s: int) -> int`` qui prend en paramètre un
+Développez une fonction ``set_max(s: BitSet) -> int`` qui prend en paramètre un
 nombre binaire ``s`` représentant un ensemble d'entiers et qui retourne le plus
 grand élément de cet ensemble. Si l'ensemble est vide, la fonction doit lever
-une exception de type ``ValueError`` avec le message "The set represented by {s}
-is empty".
+une exception de type ``ValueError`` avec le message "Cannot get the maximum of
+an empty set".
 
 ..  note:: 
 
@@ -333,7 +599,9 @@ is empty".
     :language: webtp
     :interpreterargs: layout=["Editor", "Console"]
 
-    def set_max(s: int) -> int:
+    type BitSet = int
+
+    def set_max(s: BitSet) -> int:
         ''' 
         
         Retourne le plus grand élément de l'ensemble représenté par s
@@ -345,7 +613,7 @@ is empty".
         >>> set_max(0b00000) # plus grand élément de l'ensemble vide
         Traceback (most recent call last):
         ...
-        ValueError: The set represented by 0b00000 is empty
+        ValueError: Cannot get the maximum of an empty set
 
         '''
         ...
@@ -354,7 +622,254 @@ is empty".
         import doctest
         doctest.testmod()
 
+..  reveal:: bitwise_set_max_solution
+    :showtitle: Solution
+    :hidetitle: Cacher
+    :instructoronly:
+
+    La fonction peut être implémentée en utilisant l'opérateur de bitwise AND
+    (``&``) avec le complément de ``s`` pour trouver le plus grand élément dans
+    l'ensemble représenté par le nombre binaire. Voici la solution:
+
+    ..  activecode:: bff98335-fbac-4f2d-a947-18588c841218
+        :language: webtp
+        :interpreterargs: layout=["Editor", "Console"]
+
+        type BitSet = int
+
+        def set_max(s: BitSet) -> int:
+            ''' 
+            
+            Retourne le plus grand élément de l'ensemble représenté par s
+            
+            >>> set_max(0b10101) # plus grand élément de {0, 2, 4}
+            4
+            >>> set_max(0b01010) # plus grand élément de {1, 3}
+            3
+            >>> set_max(0b00000) # plus grand élément de l'ensemble vide
+            Traceback (most recent call last):
+            ...
+            ValueError: Cannot get the maximum of an empty set
+
+            '''
+            if s == 0:
+                raise ValueError(f"Cannot get the maximum of an empty set")
+            return s.bit_length() - 1
+
+Exercice 10
+-----------
+
+Développez une fonction ``set_size(s: BitSet) -> int`` qui prend en paramètre un
+nombre binaire ``s`` représentant un ensemble d'entiers et qui retourne le
+nombre d'éléments dans cet ensemble.
+
+..  note:: 
+
+    La fonction doit être très efficace et ne doit pas utiliser de boucle ni de
+    conditionnelle. Elle doit faire le travail en une seule ligne de code, en
+    utilisant les opérateurs sur les bits.
+
+..  activecode:: bitwise_set_size.py
+    :language: webtp
+    :interpreterargs: layout=["Editor", "Console"]
+
+    type BitSet = int
+
+    def set_size(s: BitSet) -> int:
+        ''' 
         
+        Retourne le nombre d'éléments dans l'ensemble représenté par s
+        
+        >>> set_size(0b10101) # nombre d'éléments dans {0, 2, 4}
+        3
+        >>> set_size(0b01010) # nombre d'éléments dans {1, 3}
+        2
+        >>> set_size(0b00000) # nombre d'éléments dans l'ensemble vide
+        0
+
+        '''
+        ...
+
+    if __name__ == '__main__':
+        import doctest
+        doctest.testmod()
+
+..  reveal:: bitwise_set_size_solution
+    :showtitle: Solution
+    :hidetitle: Cacher
+    :instructoronly:
+
+    La fonction peut être implémentée en utilisant la méthode ``bit_count()`` de
+    Python pour compter le nombre de bits à 1 dans le nombre binaire. Voici la
+    solution:
+
+    ..  activecode:: 4734197a-ddfe-4ac6-9ec8-ec47b12acff2
+        :language: webtp
+        :interpreterargs: layout=["Editor", "Console"]
+
+        type BitSet = int
+
+        def set_size(s: BitSet) -> int:
+            ''' 
+            
+            Retourne le nombre d'éléments dans l'ensemble représenté par s
+            
+            >>> set_size(0b10101) # nombre d'éléments dans {0, 2, 4}
+            3
+            >>> set_size(0b01010) # nombre d'éléments dans {1, 3}
+            2
+            >>> set_size(0b00000) # nombre d'éléments dans l'ensemble vide
+            0
+
+            '''
+            return s.bit_count()
+
+Exercice 11
+-----------
+
+Développez une fonction ``create_bitset(elements: Iterable[int]) -> BitSet`` qui
+prend en paramètre un itérable d'entiers et qui retourne un nombre binaire
+représentant l'ensemble de ces éléments.
+
+..  note:: 
+
+    La fonction doit être le plus efficace possible et doit utiliser les
+    fonctions précédemment définies pour construire le nombre binaire
+    représentant l'ensemble des éléments.
+
+..  activecode:: bitwise_set_create_bitset.py
+    :language: webtp
+    :interpreterargs: layout=["Editor", "Console"]
+
+    from typing import Iterable
+
+    type BitSet = int
+
+    def create_bitset(elements: Iterable[int]) -> BitSet:
+        ''' 
+        
+        Retourne un nombre binaire représentant l'ensemble des éléments
+        
+        >>> create_bitset([0, 2, 2, 4]) == 0b10101
+        True
+        >>> create_bitset({1, 3}) == 0b01010
+        True
+        >>> create_bitset(set()) == 0b00000
+        True
+        >>> create_bitset({0, 1, 2, 3, 4}) == 0b11111
+        True
+
+        '''
+        ...
+
+    ..  reveal:: bitwise_set_create_bitset_solution
+        :showtitle: Solution
+        :hidetitle: Cacher
+        :instructoronly:
+
+        from typing import Iterable
+
+        type BitSet = int
+
+        def add_element(s: BitSet, element: int) -> BitSet:
+            return s | (1 << element)
+
+        def create_bitset(elements: Iterable[int]) -> BitSet:
+            ''' 
+            
+            Retourne un nombre binaire représentant l'ensemble des éléments
+            
+            >>> create_bitset([0, 2, 2, 4]) == 0b10101
+            True
+            >>> create_bitset({1, 3}) == 0b01010
+            True
+            >>> create_bitset(set()) == 0b00000
+            True
+            >>> create_bitset({0, 1, 2, 3, 4}) == 0b11111
+            True
+
+            '''
+            s: BitSet = 0
+            for element in elements:
+                s = add_element(s, element)
+            return s
+
+Exercice 12
+-----------
+
+Créez une fonction ``bitset_to_list(s: BitSet) -> list[int]`` qui prend en
+paramètre un nombre binaire ``s`` représentant un ensemble d'entiers et qui
+retourne une liste ordonnée des éléments de cet ensemble.
+
+..  note:: 
+
+    La fonction doit être le plus efficace possible et doit utiliser les
+    fonctions précédemment définies pour construire la liste des éléments de
+    l'ensemble représenté par le nombre binaire.
+
+..  activecode:: bitwise_set_to_list.py
+    :language: webtp
+    :interpreterargs: layout=["Editor", "Console"]
+
+    type BitSet = int
+
+    def bitset_to_list(s: BitSet) -> list[int]:
+        ''' 
+        
+        Retourne une liste ordonnée des éléments de l'ensemble représenté par s
+        
+        >>> bitset_to_list(0b10101)
+        [0, 2, 4]
+        >>> bitset_to_list(0b01010)
+        [1, 3]
+        >>> bitset_to_list(0b00000)
+        []
+        >>> bitset_to_list(0b11111)
+        [0, 1, 2, 3, 4]
+
+        '''
+        ...
+
+    if __name__ == '__main__':
+        import doctest
+        doctest.testmod()
+
+..  reveal:: bitwise_set_to_list_solution
+    :showtitle: Solution
+    :hidetitle: Cacher
+    :instructoronly:
+
+    La fonction peut être implémentée en utilisant une boucle pour parcourir les
+    bits du nombre binaire et ajouter les éléments correspondants à la liste
+    des éléments de l'ensemble. Voici la solution:
+
+    ..  activecode:: 9ac06bab-3b4a-4342-b445-8650a9cec2a6
+        :language: webtp
+        :interpreterargs: layout=["Editor", "Console"]
+
+        type BitSet = int
+
+        def has_element(s: BitSet, element: int) -> bool:
+            return (s & (1 << element)) != 0
+
+        def bitset_to_list(s: BitSet) -> list[int]:
+            ''' 
+            
+            Retourne une liste ordonnée des éléments de l'ensemble représenté par s
+            
+            >>> bitset_to_list(0b10101)
+            [0, 2, 4]
+            >>> bitset_to_list(0b01010)
+            [1, 3]
+            >>> bitset_to_list(0b00000)
+            []
+            >>> bitset_to_list(0b11111)
+            [0, 1, 2, 3, 4]
+
+            ''' 
+            
+            n = s.bit_length()
+            return [i for i in range(n) if has_element(s, i)]
 
 Résolution de Sudoku
 ====================
@@ -364,6 +879,7 @@ solveur de contraintes ``ToyCSP``.
 
 ..  activecode:: session2_exos_sudoku1
     :language: webtp
+    :interpreterargs: branch=branch&layout=["Editor", "Console"]
 
     ######################## Importation dans WebTigerPython ############
     from pyodide.http import open_url
