@@ -23,6 +23,8 @@ https://github.com/donnerc/pyminicp
 
 ..  activecode:: benchmarking-compare
     :language: webtp
+    :interpreterargs: branch=branch&filesystemSize=20
+
 
     ######################## Importation dans WebTigerPython ############
     from pyodide.http import open_url
@@ -107,14 +109,6 @@ Conclusions
         11,,3634.0,14109.0
         12,,6649.0,84866.0
 
-    Représentation graphique des résultats:
-
-    ..  raw:: html
-
-        <iframe 
-            src="https://www.desmos.com/calculator/9op0y4poip?embed" 
-            width="100%" height="500" style="border: 1px solid #ccc" frameborder=0></iframe>
-
     Le programme suivant effectue les mesures et les affiche avec le module
     ``matplotlib``. Le DFS avec filtrage est si lent qu'on ne prend les mesures
     que pour :math:`n \leq 8` et on remplace le temps par des valeurs négatives
@@ -122,6 +116,7 @@ Conclusions
 
     ..  activecode:: e6b0e98f-f96c-41b9-8d5b-d85ed68885c9
         :language: webtp
+        :interpreterargs: branch=branch&filesystemSize=20
 
         ######################## Importation dans WebTigerPython ############
         from pyodide.http import open_url
@@ -193,8 +188,9 @@ Conclusions
 
 ..  shortanswer:: toycsp_profiling_question
 
-    Déterminez les parties du code qui occupent la plupart du temps processeur
-    et qu'il vaudrait la peine d'optimiser.
+    Faites des hypothèses sur les parties du code qui occupent la plupart du
+    temps processeur et qu'il vaudrait la peine d'optimiser. Discutez de vos
+    hypothèses les autres.
 
 Profiling du programme
 ======================
@@ -205,228 +201,15 @@ fonction / méthode est appelée et le temps passé dans chaque fonction.
 
 ..  activecode:: nqueens_toycsp_profiling
     :language: webtp
+    :interpreterargs: branch=branch&filesystemSize=20
 
-    from collections.abc import Iterable
-    from abc import ABC, abstractmethod
-    from typing import override
-    from typing import List, Optional, Any, Callable
+    ######################## Importation dans WebTigerPython ############
+    from pyodide.http import open_url
+    url = 'https://raw.githubusercontent.com/donnerc/pyminicp/refs/heads/main/build/toycsp_bundle.py'
+    with open('toycsp.py', 'w') as fd: fd.write(open_url(url).read())
+    #####################################################################
 
-    class Inconsistency(Exception):
-        pass
-
-
-    class Domain:
-        def __init__(self, *args) -> None:
-            if len(args) != 1:
-                raise TypeError("Domain takes only one parameter")
-            elif isinstance(args[0], int):
-                n = args[0]
-                self.values = set(range(n))
-            elif isinstance(args[0], set):
-                dom = args[0]
-                self.values = dom.copy()
-            else:
-                raise TypeError("Argument must be int or set[int]")
-
-        def is_fixed(self) -> bool:
-            return len(self.values) == 1
-
-        def size(self) -> int:
-            return len(self.values)
-        
-        def __len__(self) -> int:
-            return self.size()
-
-        def min(self) -> int:
-            return min(self.values)
-
-        def remove(self, v: int) -> bool:
-            if v in self.values:
-                self.values.remove(v)
-                if not self.values:
-                    raise Inconsistency
-                return True
-            return False
-
-        def fix(self, v: int):
-            if v not in self.values:
-                raise Inconsistency
-            self.values = {v}
-
-        def clone(self) -> "Domain":
-            return Domain(self.values)
-
-        def __repr__(self) -> str:
-            return f"Domain({self.values})"
-
-    class Variable:
-
-        var_counter = 0
-        
-        def __init__(self, dom: Iterable[int], name: str = None) -> None:
-            self.dom = Domain(set(dom))
-            self.name = name or 'Var' + str(Variable.var_counter)
-            Variable.var_counter += 1
-            
-        def value(self) -> int:
-            if self.dom.is_fixed():
-                return self.dom.min()
-            else:
-                return None
-            
-        
-        def __repr__(self) -> str:
-            return f"Variable(dom={self.dom.values}, name='{self.name}')"
-
-    class Constraint(ABC):
-        @abstractmethod
-        def propagate(self) -> bool:
-            pass
-
-
-
-    class NotEqual(Constraint):
-        def __init__(self, x: Variable, y: Variable, offset: int = 0) -> None:
-            self.x = x
-            self.y = y
-            self.offset = offset
-
-        @override
-        def propagate(self) -> bool:
-            if self.x.dom.is_fixed():
-                return self.y.dom.remove(self.x.dom.min() - self.offset)
-            elif self.y.dom.is_fixed():
-                return self.x.dom.remove(self.y.dom.min() + self.offset)
-            return False
-
-        def __repr__(self) -> str:
-            return f'NotEqual(x={self.x}, y={self.y}, offset={self.offset})'
-
-
-    class ToyCSP:
-        def __init__(self, *args, **kwargs):
-
-            self.constraints: List[Constraint] = []
-            self.variables: List[Variable] = []
-            self.n_recur = 0  # Number of recursive calls
-
-            # collects all handlers (args beginning with `on_`)
-            self.handlers = {
-                arg.split('on_')[1]: [value] for arg, value in kwargs.items() if arg.startswith("on_")
-            }
-
-        def __repr__(self) -> str:
-            #return f"ToyCSP(constraints={self.constraints}, variables={self.variables})"
-            return f"ToyCSP : #vars = {len(self.variables)} / #constraints = {len(self.constraints)}"
-
-        ############ Event handler registration and management
-        def register_handler(self, event, handler) -> None:
-            if event in self.handlers:
-                self.handlers[event].append(handler)
-            else:
-                self.handlers[event] = [handler]
-
-        def call_handlers(self, event: str, infos: dict[str, Any]) -> None:
-            if event in self.handlers:
-                handlers = self.handlers[event]
-                for h in handlers: h(self, infos)
-
-        def on(self, *events):
-            def decorator(func):
-                for event in events:
-                    self.register_handler(event, func)
-            return decorator
-            
-        def no_op(self, csp: "ToyCSP", infos: dict[str, Any]) -> None:
-            pass
-        
-        ##############################################################3
-
-        def add_variable(self, domain: Iterable[int]) -> Variable:
-            var = Variable(domain)
-            self.variables.append(var)
-            return var
-
-        def post(self, constraint: Constraint, schedule_fixpoint=True) -> Constraint:
-            self.constraints.append(constraint)
-            if schedule_fixpoint:
-                self.fix_point()
-
-        def fix_point(self) -> bool:
-            self.call_handlers("beforefixpoint", {"event": "before fixpoint"})
-
-            fix = False
-            while not fix:
-                fix = True
-                for constraint in self.constraints:
-                    was_usefull = constraint.propagate()
-                    # if only one propagation is usefull amongst all constraints,
-                    # fix will become false and the while
-                    # loop will continue
-                    fix &= not was_usefull
-                    self.call_handlers("propagate", {
-                            "event": f"propagating",
-                            "usefull": was_usefull,
-                            "constraint": constraint,
-                        })
-
-            self.call_handlers("afterfixpoint", {"event": "after fixpoint"})
-
-            return fix
-
-        def backup_domains(self) -> List[Domain]:
-            backup = [var.dom.clone() for var in self.variables]
-            return backup
-
-        def restore_domains(self, backup: List[Domain]) -> None:
-            for i, var in enumerate(self.variables):
-                var.dom = backup[i]
-
-        def first_not_fixed(self) -> Optional[Variable]:
-            # https://www.programiz.com/python-programming/methods/built-in/next
-            return next((var for var in self.variables if not var.dom.is_fixed()), None)
-
-        def smallest_not_fixed(self) -> Optional[Variable]:
-            '''to be modified '''
-            return None
-
-        def get_solution(self) -> list[int]:
-            return [v.value() for v in self.variables]
-
-        def dfs(self) -> None:
-            self.n_recur += 1
-
-            # Choisissez une variable non fixée (première rencontrée ou la plus petite)
-            not_fixed = (
-                self.first_not_fixed()
-            )  # Essayer d'abord first_not_fixed (implémentation originale)
-
-            if not not_fixed:
-                # Toutes les variables sont fixées, une solution est trouvée
-                self.call_handlers("solution", {})
-            else:
-                variable = not_fixed
-                value = variable.dom.min()
-                backup = self.backup_domains()
-
-                # Branche gauche : affecter la valeur à la variable
-                try:
-                    variable.dom.fix(value)
-                    self.fix_point()
-                    self.dfs()
-                except Inconsistency:
-                    self.call_handlers("inconsistent", {"event": "inconsistent", "current_var": variable})
-
-                # Restaurer les domaines avant d'explorer la branche droite
-                self.restore_domains(backup)
-
-                # Branche droite : retirer la valeur du domaine de la variable
-                try:
-                    variable.dom.remove(value)
-                    self.fix_point()
-                    self.dfs()
-                except Inconsistency:
-                    self.call_handlers("inconsistent", {"event": "inconsistent", "current_var": variable})
+    from toycsp import ToyCSP, Variable, NotEqual
 
     def nqueens(n: int) -> list[list[int]]:
         # Problème des n dames
@@ -471,3 +254,68 @@ fonction / méthode est appelée et le temps passé dans chaque fonction.
             .sort_stats(SortKey.CUMULATIVE)
             .print_stats()
         )
+
+Éléments à optimiser
+====================
+
+..  shortanswer:: toycsp_profiling_optimisation
+
+    En vous basant sur les résultats du profiling, proposez des pistes
+    d'optimisation du code. Vous pouvez aussi faire des hypothèses sur les
+    parties du code qui sont les plus coûteuses en temps processeur et qui
+    mériteraient d'être optimisées, même si elles n'apparaissent pas dans les
+    premières lignes du profiling.
+
+..  reveal:: toycsp_profiling_optimisation_reponse
+    :showtitle: Réponse
+    :hidetitle: Cacher
+
+    D'après le profiling, les fonctions les plus coûteuses sont :
+    
+    - ``ToyCSP.dfs`` : c'est la fonction qui effectue la recherche en
+      profondeur. Elle est appelée une seule fois, mais elle est très coûteuse
+      en temps d'exécution.
+    
+    - ``ToyCSP.propagate`` : c'est la fonction qui effectue la propagation des
+      contraintes. Elle est appelée de nombreuses fois (plus de 100 000 fois
+      pour n=9) et elle est également très coûteuse en temps d'exécution.
+    
+    - ``ToyCSP.post`` : c'est la fonction qui permet de poster une contrainte
+      dans le solveur. Elle est appelée de nombreuses fois (plus de 200 000 fois
+      pour n=9) et elle est également coûteuse en temps d'exécution.
+    
+    - ``ToyCSP.get_solution`` : c'est la fonction qui permet d'obtenir la
+      solution courante du solveur. Elle est appelée de nombreuses fois (plus de
+      100 000 fois pour n=9) et elle est également coûteuse en temps
+      d'exécution.
+    
+Principaux goulots d'étranglement
+=================================
+
+En analysant attentivement le code, on constate que les éléments suivants ne
+sont pas efficaces et pourraient être optimisés :
+
+-   Les domaines des variables :
+
+    - Le calcul du ``min`` est :math:`O(|D|)` et est effectué à chaque fois que
+      l'on veut faire du forward-checking. On pourrait maintenir une variable
+      qui stocke le minimum du domaine de chaque variable, et la mettre à jour à
+      chaque fois que le domaine est modifié.
+
+    - La sauvegarde et la restauration des domaines sont coûteuses, car la copie
+      d'un domaine est :math:`O(|D|)`. On pourrait implémenter les domaines de
+      manière plus efficace pour optimiser ces opérations, par exemple en
+      utilisant des structures de données plus adaptées (``BitSet`` ou
+      ``SparseSet``).
+
+-   L'algorithme du point fixe propage de très nombreuses fois les contraintes
+    de manière inutile, car il repropage à chaque fois toutes les contraintes,
+    même celles qui n'ont pas été modifiées. On pourrait maintenir une file de
+    contraintes à propager, et ne propager que les contraintes qui ont été
+    modifiées.
+
+-   On n'utilise que des contraintes binaires ``NotEqual(x, y, offset)``, mais
+    on pourrait implémenter des contraintes globales plus efficaces pour ce type
+    de problème, comme la contrainte ``AllDifferent`` qui est spécialement
+    conçue pour les problèmes d'assignation de valeurs distinctes à un ensemble
+    de variables.

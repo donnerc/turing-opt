@@ -446,9 +446,9 @@ présentes dans les autres domaines.
 
         ...
 
-        if __name__ == '__main__':
-            import doctest
-            doctest.testmod()
+    if __name__ == '__main__':
+        import doctest
+        doctest.testmod()
 
 
 ..  reveal:: 6f490d63-d9d5-4bb7-b844-bff400627d42

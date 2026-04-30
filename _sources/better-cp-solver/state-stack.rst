@@ -27,7 +27,7 @@ Code de base
 
 ..  activecode:: state_stack
     :language: webtp
-    :interpreterargs: vanilla_python=true&debug_mode=true&layout=["Editor", "Console"]
+    :interpreterargs: branch=branch&debug_mode=true&layout=["Editor", "Console"]
 
     ############### Importation dans WebTigerPython ############
     from pyodide.http import open_url

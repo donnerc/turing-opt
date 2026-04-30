@@ -28,37 +28,15 @@ La visualisation ci-dessous permet de comprendre le fonctionnement du solveur
     with open('nqueens_visu.py', 'w') as fd: fd.write(open_url(url).read())
     ############################################################
 
-    from toycsp import Variable, Domain, Inconsistency, Constraint
+    from toycsp import Variable, Domain, Inconsistency, Constraint, NotEqual
 
     from collections.abc import Iterable
     from abc import ABC, abstractmethod
-    from typing import List, Optional, Any, Callable
+    from typing import Optional, Any, Callable, override, cast
 
-    class NotEqual(Constraint):
-        """
-        Constraint representing x != y + offset.
-        """
+    type PartialSolution = list[int | None]
+    type Solution = list[int]
 
-        def __init__(self, x: Variable, y: Variable, offset: int = 0) -> None:
-            self.x = x
-            self.y = y
-            self.offset = offset
-
-        def propagate(self) -> bool:
-            """
-            Propagates the NotEqual constraint.
-
-            Returns:
-                True if any value was removed from a domain, False otherwise.
-            """
-            if self.x.dom.is_fixed():
-                return self.y.dom.remove(self.x.dom.min() - self.offset)
-            elif self.y.dom.is_fixed():
-                return self.x.dom.remove(self.y.dom.min() + self.offset)
-            return False
-
-        def __repr__(self) -> str:
-            return f'NotEqual(x={self.x}, y={self.y}, offset={self.offset})'
 
 
     class ToyCSP:
@@ -68,9 +46,9 @@ La visualisation ci-dessous permet de comprendre le fonctionnement du solveur
 
         def __init__(self, *args, **kwargs):
 
-            self.constraints: List[Constraint] = []
-            self.variables: List[Variable] = []
-            self.n_recur = 0  # Number of recursive calls
+            self.constraints: list[Constraint] = []
+            self.variables: list[Variable] = []
+            self.n_recur: int = 0  # Number of recursive calls
 
             # collects all handlers (args beginning with `on_`)
             self.handlers = {
@@ -78,60 +56,40 @@ La visualisation ci-dessous permet de comprendre le fonctionnement du solveur
             }
 
         def __repr__(self) -> str:
-            #return f"ToyCSP(constraints={self.constraints}, variables={self.variables})"
+            # return f"ToyCSP(constraints={self.constraints}, variables={self.variables})"
             return f"ToyCSP : #vars = {len(self.variables)} / #constraints = {len(self.constraints)}"
 
-        ############ Event handler registration and management
-        def register_handler(self, event, handler) -> None:
-            if event in self.handlers:
-                self.handlers[event].append(handler)
-            else:
-                self.handlers[event] = [handler]
-
-        def call_handlers(self, event: str, infos: dict[str, Any]) -> None:
-            if event in self.handlers:
-                handlers = self.handlers[event]
-                for h in handlers: h(self, infos)
-
-        def on(self, *events):
-            def decorator(func):
-                for event in events:
-                    self.register_handler(event, func)
-            return decorator
-            
-        def no_op(self, csp: "ToyCSP", infos: dict[str, Any]) -> None:
-            pass
-        
-        ###############################################################
-
-        def add_variable(self, domain: Iterable[int]) -> Variable:
+        def add_variable(self, domain: Iterable[int], name: str | None = None) -> Variable:
             """
-            Creates a variable with the given domain size.
+            Creates a variable with the given domain.
 
             Args:
-                dom_size: The number of values in the domain.
+                domain: An iterable of integers representing the domain values.
 
             Returns:
                 A new Variable object.
             """
-            var = Variable(domain)
+            var = Variable(domain, name)
             self.variables.append(var)
             return var
 
         def post(self, constraint: Constraint, schedule_fixpoint=True) -> Constraint:
             """
-            Adds a not-equal constraint between two variables.
+            Posts (adds) a constraint to the CSP and optionally schedules a fix point.
 
             Args:
-                x: The first variable.
-                y: The second variable.
-                offset: The offset value. Defaults to 0.
+                constraint: The constraint to add.
+                schedule_fixpoint: If True, schedules a fix point after adding the constraint.
+
+            Returns:
+                The added constraint.
             """
             self.constraints.append(constraint)
             if schedule_fixpoint:
                 self.fix_point()
+            return constraint
 
-        def backup_domains(self) -> List[Domain]:
+        def backup_domains(self) -> list[Domain]:
             """
             Creates a backup copy of all variable domains.
 
@@ -141,7 +99,7 @@ La visualisation ci-dessous permet de comprendre le fonctionnement du solveur
             backup = [var.dom.clone() for var in self.variables]
             return backup
 
-        def restore_domains(self, backup: List[Domain]) -> None:
+        def restore_domains(self, backup: list[Domain]) -> None:
             """
             Restores the domains of all variables from the backup.
 
@@ -151,10 +109,30 @@ La visualisation ci-dessous permet de comprendre le fonctionnement du solveur
             for i, var in enumerate(self.variables):
                 var.dom = backup[i]
 
-        def get_solution(self) -> list[int]:
-            return [v.value() for v in self.variables]
+        def get_partial_solution(self) -> PartialSolution:
+            """
+            Returns the current partial solution as a list of variable values or None for unfixed variables.
 
-        def first_not_fixed(self) -> Optional[Variable]:
+            Returns:
+                A list of integers or None representing the current partial solution.
+            """
+            return [cast(Optional[int], var.value()) for var in self.variables]
+
+        def get_solution(self) -> Solution:
+            """
+            Returns the current solution as a list of variable values.
+
+            Raises a ValueError if not all variables are fixed.
+
+            Returns:
+                A list of integers representing the solution.
+            """
+            if not all(var.dom.is_fixed() for var in self.variables):
+                raise ValueError(
+                    "Not all variables are fixed. No solution available.")
+            return [cast(int, v.value()) for v in self.variables]
+
+        def first_not_fixed(self) -> Variable | None:
             """
             Finds the first variable that has a non-fixed domain.
 
@@ -164,6 +142,21 @@ La visualisation ci-dessous permet de comprendre le fonctionnement du solveur
             # https://www.programiz.com/python-programming/methods/built-in/next
             return next((var for var in self.variables if not var.dom.is_fixed()), None)
 
+        def smallest_not_fixed(self) -> Variable | None:
+            """
+            Finds the variable with the smallest domain size that is not fixed.
+
+            Returns:
+                An Optional containing the variable with the smallest domain, or None if all are fixed.
+            """
+            min_size = float("inf")
+            smallest_var = None
+            for var in self.variables:
+                if not var.dom.is_fixed() and var.dom.size() < min_size:
+                    min_size = var.dom.size()
+                    smallest_var = var
+            # return smallest_var if smallest_var else None
+            return smallest_var
 
         def fix_point(self) -> bool:
             """
@@ -184,10 +177,10 @@ La visualisation ci-dessous permet de comprendre le fonctionnement du solveur
                     # loop will continue
                     fix &= not was_usefull
                     self.call_handlers("propagate", {
-                            "event": f"propagating",
-                            "usefull": was_usefull,
-                            "constraint": constraint,
-                        })
+                        "event": f"propagating",
+                        "usefull": was_usefull,
+                        "constraint": constraint,
+                    })
 
             self.call_handlers("afterfixpoint", {"event": "after fixpoint"})
 
@@ -221,7 +214,8 @@ La visualisation ci-dessous permet de comprendre le fonctionnement du solveur
                     self.fix_point()
                     self.dfs()
                 except Inconsistency:
-                    self.call_handlers("inconsistent", {"event": "inconsistent", "current_var": variable})
+                    self.call_handlers(
+                        "inconsistent", {"event": "inconsistent", "current_var": variable})
 
                 # Restaurer les domaines avant d'explorer la branche droite
                 self.restore_domains(backup)
@@ -232,7 +226,40 @@ La visualisation ci-dessous permet de comprendre le fonctionnement du solveur
                     self.fix_point()
                     self.dfs()
                 except Inconsistency:
-                    self.call_handlers("inconsistent", {"event": "inconsistent", "current_var": variable})
+                    self.call_handlers(
+                        "inconsistent", {"event": "inconsistent", "current_var": variable})
+
+        ##############################################################################
+        # Event handler registration and management
+
+        def register_handler(self, event, handler) -> None:
+            """Registers a handler function for a specific event."""
+            if event in self.handlers:
+                self.handlers[event].append(handler)
+            else:
+                self.handlers[event] = [handler]
+
+        def call_handlers(self, event: str, infos: dict[str, Any]) -> None:
+            """Calls all registered handlers for a specific event."""
+            if event in self.handlers:
+                handlers = self.handlers[event]
+                for h in handlers:
+                    h(self, infos)
+
+        def on(self, *events):
+            """Decorator to register a function as a handler for one or more events."""
+            def decorator(func):
+                for event in events:
+                    self.register_handler(event, func)
+            return decorator
+
+        def no_op(self, csp: "ToyCSP", infos: dict[str, Any]) -> None:
+            """A no-op handler that does nothing."""
+            pass
+
+
+
+
 
     ########################### Modèle du problème des n dames #################################
     from nqueens_visu import draw_chess_board
@@ -244,7 +271,7 @@ La visualisation ci-dessous permet de comprendre le fonctionnement du solveur
     csp: ToyCSP = ToyCSP()
 
     # variables de décision
-    q: list[Variable] = [csp.add_variable(range(n)) for _ in range(n)]
+    q: list[Variable] = [csp.add_variable(range(n), name=f'Q[{i}]') for i in range(n)]
 
     # Formulation des contraintes
     for i in range(n):
@@ -255,7 +282,7 @@ La visualisation ci-dessous permet de comprendre le fonctionnement du solveur
 
 
     # useless when using the debugger
-    wait = False
+    wait = True
 
     @csp.on('solution')
     def handle_solution(csp: ToyCSP, infos) -> None:
@@ -264,11 +291,22 @@ La visualisation ci-dessous permet de comprendre le fonctionnement du solveur
         draw_chess_board(csp)
         if wait: c = getKeyWait()
 
-    @csp.on('beforefixpoint', 'afterfixpoint', 'inconsistency', 'propagate')
+    @csp.on('beforefixpoint', 'afterfixpoint', 'inconsistent', 'propagate')
     def handle_everything(csp: ToyCSP, infos) -> None:
         clean()
+        setPos(-400, 300)
+        event = infos.get('event')
+        usefull = infos.get('usefull', '')
+        constraint = infos.get('constraint', '')
+        text = f'''
+        Event : {event}
+        Usefull : {usefull}
+        Constraint : {str(constraint)}
+        Infos : {infos}
+        '''
+        label(text)
         draw_chess_board(csp)
-        print(infos, csp.variables)
+        print(str(infos), str(csp.variables))
         if wait: c = getKeyWait()
 
 
@@ -303,6 +341,21 @@ Méthode ``add_variable``
 
     Expliquez précisément l'utilité de la méthode ``add_variable`` ?
 
+..  reveal:: comprehension-toycsp-add-variable-reponse
+    :showtitle: Explication de la méthode ``add_variable``
+    :hidetitle: Cacher
+    :modal:
+    :modaltitle: Explication de la méthode ``add_variable``
+    
+
+    La méthode ``add_variable`` permet de créer facilement une variable de
+    décision entière pour le problème de satisfaction de contraintes. Elle prend
+    en entrée un domaine (une liste de valeurs possibles pour la variable) et un
+    nom optionnel pour la variable. Elle crée un objet ``Variable`` avec ce
+    domaine et ce nom, l'ajoute à la liste des variables du CSP, et retourne cet
+    objet. Cette méthode est essentielle pour définir les variables qui seront
+    utilisées dans les contraintes du problème.
+
 
 Méthode ``post``
 ----------------
@@ -311,12 +364,41 @@ Méthode ``post``
 
     Expliquez précisément l'utilité de la méthode ``post`` ?
 
+..  reveal:: comprehension-toycsp-post-reponse
+    :showtitle: Explication de la méthode ``post``
+    :hidetitle: Cacher
+    :modal:
+    :modaltitle: Explication de la méthode ``post``
+
+    La méthode ``post`` permet d'ajouter une contrainte au CSP. Elle prend en
+    entrée un objet ``Constraint`` et l'ajoute à la liste des contraintes du
+    CSP. De plus, elle peut automatiquement déclencher une propagation des
+    contraintes (fix point) après l'ajout de la contrainte, ce qui permet de
+    réduire les domaines des variables dès que possible. Cette méthode est
+    essentielle pour construire le modèle du problème en ajoutant les
+    contraintes qui définissent les relations entre les variables.
+
 Méthode ``backup_domains``
 --------------------------
 
 ..  shortanswer:: comprehension-toycsp-backup-domains
 
     Expliquez précisément l'utilité de la méthode ``backup_domains`` ?
+
+..  reveal:: comprehension-toycsp-backup-domains-reponse
+    :showtitle: Explication de la méthode ``backup_domains``
+    :hidetitle: Cacher
+    :modal:
+    :modaltitle: Explication de la méthode ``backup_domains``
+
+    La méthode ``backup_domains`` permet de créer une copie de sauvegarde des
+    domaines actuels de toutes les variables du CSP. Cela est particulièrement
+    utile lors de la recherche (DFS) pour pouvoir restaurer les domaines à un
+    état précédent après avoir exploré une branche de l'arbre de recherche. En
+    cas d'inconsistance ou après avoir exploré une branche, on peut utiliser
+    cette sauvegarde pour revenir à l'état précédent des domaines et continuer à
+    explorer d'autres branches sans être affecté par les modifications faites
+    dans la branche précédente.
 
 
 Méthode ``restore_domains``
@@ -327,6 +409,21 @@ Méthode ``restore_domains``
     Expliquez précisément l'utilité de la méthode ``restore_domains`` ? Faites
     une recherche sur le fonction ``enumerate`` si vous ne savez pas ce qu'elle
     fait.
+
+..  reveal:: comprehension-toycsp-restore-domains-reponse
+    :showtitle: Explication de la méthode ``restore_domains``
+    :hidetitle: Cacher
+    :modal:
+    :modaltitle: Explication de la méthode ``restore_domains``
+
+    La méthode ``restore_domains`` permet de restaurer les domaines de toutes
+    les variables à partir d'une sauvegarde créée précédemment avec la méthode
+    ``backup_domains``. Elle prend en entrée une liste de domaines (la
+    sauvegarde) et met à jour les domaines de toutes les variables du CSP en les
+    remplaçant par les domaines sauvegardés. Cela est essentiel pour revenir à
+    un état précédent des domaines après avoir exploré une branche de l'arbre de
+    recherche, surtout en cas d'inconsistance ou après avoir terminé
+    l'exploration d'une branche.
 
 Méthode ``first_not_fixed``
 ---------------------------
@@ -341,6 +438,19 @@ Méthode ``first_not_fixed``
     Utilisez une IA générative pour comprendre la ligne ::
 
         return next((var for var in self.variables if not var.dom.is_fixed()), None)
+
+..  reveal:: comprehension-toycsp-firstnotfixed-reponse
+    :showtitle: Explication de la méthode ``first_not_fixed``
+    :hidetitle: Cacher
+    :modal:
+    :modaltitle: Explication de la méthode ``first_not_fixed``
+
+    La méthode ``first_not_fixed`` permet de trouver la première variable du CSP
+    qui n'est pas encore fixée (c'est-à-dire dont le domaine contient encore
+    plusieurs valeurs). Elle utilise une expression générateur pour parcourir la
+    liste des variables et retourne la première variable qui n'est pas fixée. Si
+    toutes les variables sont fixées, elle retourne ``None``. Cette méthode est
+    utile pour choisir une variable à assigner lors de la recherche (DFS).
 
 Méthode ``fixpoint``
 --------------------
@@ -376,10 +486,51 @@ dans les domaines des variables non assignées).
     Que fait l'opérateur ``&=``. Testez cet opérateur dans un REPL Python séparé
     (Thonny ou le terminal).
 
+..  reveal:: comprehension-toycsp-bitwise-and-reponse
+    :showtitle: Explication de l'opérateur ``&=``
+    :hidetitle: Cacher
+    :modal:
+    :modaltitle: Explication de l'opérateur ``&=``
+
+    L'opérateur ``&=`` est un opérateur de bitwise AND (ET binaire) combiné avec
+    une affectation. Il prend la valeur actuelle de la variable à gauche de
+    l'opérateur, effectue une opération AND bit à bit avec la valeur à droite de
+    l'opérateur, et stocke le résultat dans la variable à gauche. Par exemple,
+    si vous avez ``x = 5`` (qui est 0101 en binaire) et que vous faites ``x &=
+    3`` (qui est 0011 en binaire), le résultat sera ``x = 1`` (0001 en binaire),
+    car 0101 AND 0011 donne 0001.
+
+    Ici, on utilise une variable booléenne ``fix`` qui est initialisée à
+    ``True``. Si une propagation de contrainte est utile (c'est-à-dire qu'elle a
+    réduit le domaine d'une variable), on met ``fix`` à ``False``. Si aucune
+    propagation n'est utile, ``fix`` reste ``True``, ce qui signifie que nous
+    avons atteint un point fixe.
+
 ..  shortanswer:: comprehension-toycsp-fixpoint
 
     Essayez d'expliquer son fonctionnement en rajoutant des commentaires dans le
     code si nécessaire et en décrivant précisément son fonctionnement.
+
+..  reveal:: comprehension-toycsp-fixpoint-reponse
+    :showtitle: Explication de la méthode ``fix_point``
+    :hidetitle: Cacher
+    :modal:
+    :modaltitle: Explication de la méthode ``fix_point``
+
+    La méthode ``fix_point`` implémente un algorithme de propagation des
+    contraintes jusqu'à ce qu'un point fixe soit atteint. Elle commence par
+    appeler les gestionnaires d'événts pour signaler le début du processus de
+    fix point. Ensuite, elle utilise une boucle ``while`` qui continue tant que
+    des changements sont effectués dans les domaines des variables. À chaque
+    itération, elle parcourt toutes les contraintes du CSP et appelle leur
+    méthode ``propagate()``. Si la propagation d'une contrainte est utile
+    (c'est-à-dire qu'elle a réduit le domaine d'une variable), la variable
+    ``fix`` est mise à ``False``, ce qui signifie que nous n'avons pas encore
+    atteint un point fixe. Si aucune propagation n'est utile, ``fix`` reste
+    ``True``, et la boucle se termine, indiquant que nous avons atteint un point
+    fixe où aucune contrainte ne peut plus réduire les domaines des variables.
+    Enfin, elle appelle les gestionnaires d'événements pour signaler la fin du
+    processus de fix point.
 
 
 Méthode ``dfs``
@@ -398,6 +549,22 @@ différences suivantes:
     était essentiel dans les fonctions ``dfs`` utilisées dans les approches
     précédentes?
 
+..  reveal:: comprehension-toycsp-whynoindex-reponse
+    :showtitle: Explication de l'absence de paramètre ``index`` dans la méthode ``dfs``
+    :hidetitle: Cacher
+    :modal:
+    :modaltitle: Explication de l'absence de paramètre ``index`` dans la méthode ``dfs``
+
+    La méthode ``dfs`` n'utilise pas de paramètre ``index`` pour suivre la
+    position dans la liste des variables, car elle utilise une approche
+    différente pour choisir la variable à assigner. Au lieu de parcourir les
+    variables dans un ordre fixe (comme avec un index), elle utilise la méthode
+    ``first_not_fixed`` pour trouver la première variable qui n'est pas encore
+    fixée. Cela permet une plus grande flexibilité dans le choix de la variable
+    à assigner, et peut être combiné avec d'autres heuristiques de sélection de
+    variable (comme ``smallest_not_fixed``) sans avoir à gérer manuellement un
+    index.
+
 
 ..  shortanswer:: comprehension-toycsp-backup-restore
 
@@ -409,9 +576,39 @@ différences suivantes:
 
     - ``self.restore_domains(backup)``
 
+..  reveal:: comprehension-toycsp-backup-restore-reponse
+    :showtitle: Explication de l'utilisation de ``backup_domains`` et ``restore_domains``
+    :hidetitle: Cacher
+    :modal:
+    :modaltitle: Explication de l'utilisation de ``backup_domains`` et ``restore_domains``
+
+    Les instructions ``backup = self.backup_domains()`` et
+    ``self.restore_domains(backup)`` sont utilisées pour gérer les modifications
+    des domaines des variables lors de l'exploration de l'arbre de recherche.
+    Avant d'explorer une branche (par exemple, en fixant une variable à une
+    valeur), on crée une sauvegarde des domaines actuels des variables avec
+    ``backup_domains()``. Après avoir exploré cette branche (que ce soit la
+    branche gauche ou la branche droite), on utilise ``restore_domains(backup)``
+    pour revenir à l'état précédent des domaines avant d'explorer la prochaine
+    branche. Cela permet de s'assurer que les modifications apportées aux
+    domaines dans une branche n'affectent pas les autres branches de l'arbre de
+    recherche.
+
 
 ..  shortanswer:: comprehension-toycsp-complete-search
 
     Comment peut-on être certain que la méthode ``dfs`` explore bien tout
     l'espace de recherche?
 
+..  reveal:: comprehension-toycsp-complete-search-reponse
+    :showtitle: Explication de l'exploration complète de l'espace de recherche
+    :hidetitle: Cacher
+    :modal:
+    :modaltitle: Explication de l'exploration complète de l'espace de recherche
+
+    La méthode ``dfs`` explore tout l'espace de recherche en utilisant une
+    approche récursive qui tente toutes les valeurs possibles pour chaque
+    variable non fixée. Grâce à l'utilisation de ``backup_domains`` et
+    ``restore_domains``, chaque branche de l'arbre de recherche est explorée
+    indépendamment, garantissant que toutes les combinaisons possibles de
+    valeurs sont considérées.

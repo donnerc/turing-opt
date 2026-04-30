@@ -99,21 +99,31 @@ Partie 2 : Programmation par contraintes
     cp/benchmarking.rst
     cp/exos.rst
 
+..
+    cp/global-constraints.rst
 
 Partie 3 : Un solveur plus puissant
 :::::::::::::::::::::::::::::::::::
+
+..  note::
+
+    Cette partie est un résidu de l'édition 2025 du cours. Nous ne traiterons
+    pas cette partie au cours. Elle montre comment développer un solveur plus
+    professionnel, avec des structures de données plus efficaces. 
+
+    Nous la laissons de côté par manque de temps.
 
 ..  toctree::
     :maxdepth: 2
     :numbered:
     
-    part3/introduction.rst
-    part3/prerequis.rst
-    part3/stack.rst
-    part3/turingcp.rst
-    part3/statemanager.rst
-    part3/state-stack.rst
-    part3/sparse-sets.rst
+    better-cp-solver/introduction.rst
+    better-cp-solver/prerequis.rst
+    better-cp-solver/stack.rst
+    better-cp-solver/turingcp.rst
+    better-cp-solver/statemanager.rst
+    better-cp-solver/state-stack.rst
+    better-cp-solver/sparse-sets.rst
 
 
 ..

@@ -29,7 +29,7 @@ recherche:
 
 ..  activecode:: d7826bb9-5864-4c5a-9628-1a233802b551
     :language: webtp
-    :interpreterargs: vanilla_python=true&debug_mode=true&layout=["Editor", "Console"]
+    :interpreterargs: debug_mode=true&layout=["Editor", "Console"]
 
     from collections.abc import Iterable
     from abc import ABC, abstractmethod
@@ -517,6 +517,7 @@ Interface ``StateManager``
 
 ..  activecode:: study_copy_state_manager
     :language: webtp
+    :interpreterargs: branch=branch&debug_mode=true&layout=["Editor", "Console"]
 
     ############### Importation dans WebTigerPython ############
     from pyodide.http import open_url
