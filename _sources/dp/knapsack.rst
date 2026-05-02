@@ -1,307 +1,367 @@
-.. _memoization-top-down.rst:
+.. _knapsack-dp.rst:
 
-Programmation dynamique "top-down" : la mémoïsation
-###################################################
+Le problème du sac à dos avec la programmation dynamique
+########################################################
 
 ..  contents:: Contenu de la page
     :depth: 3
 
-La raison pour laquelle l'algorithme récursif ``fib(n)`` est inefficace vient du
-fait que de certains calculs sont refaits à l'identique à plusieurs moments. Par
-exemple,  on voit bien sur la figure :ref:`fib-tree-5` que l'appel ``fib(5)``
-répète quatre fois l'appel ``fib(1)``, trois fois l'appel ``fib(2)`` et deux
-fois l'appel ``fib(3)``.
+Nous avons déjà présenté le problème du sac à dos dans la section
+:ref:`01-knapsack.rst`. Nous allons maintenant programmer une solution au
+problème du sac à dos en utilisant la programmation dynamique. Nous allons
+d'abord présenter le problème de manière intuitive, puis le formuler de manière
+mathématique et enfin le résoudre par la force brute, par une approche gloutonne
+et par la programmation dynamique.
 
-..  _fib-tree-5-recompute:
+..  note::
 
-..  figure:: figures/fibonacci-5.png
-    :align: center
-    :width: 80%
+    Les explications détaillées et les solutions se trouvent dans
+    https://gyminf-ads2-dp.surge.sh/knapsack-dp.html
 
-    Arbre des appels récursifs à la fonction ``fib(n)`` pour :math:`n = 5`
+Instance ``toy-instance``
+=========================
+
+Nous allons tester différentes approches sur l'instance suivante du problème du
+sac à dos, ne contient que très peu d'articles. Nous allons ensuite appliquer
+les différentes approches à des instances plus grandes du problème.
+
+.. _table-knapsack-items-example-1:
+
+..  csv-table:: Articles disponibles dans la réserve alimentaire
+    :header-rows: 1
+    :class: longtable
+
+    No article, Description, Volume [L], Valeur nutritive [kcal]
+    0, Paquet de pâtes, 13, 2600
+    1, Paquet de pâtes, 13, 2600
+    2, Paquet de pâtes, 13, 2600
+    3, Pommes, 10, 500
+    4, Paquet de riz, 24, 4500
+    5, Yogourt, 11, 960
+
+..  admonition:: Remarques
+
+    Pour résoudre le problème, il faut prendre en compte les remarques suivantes:
+
+    *   Pour pouvoir utiliser la programmation dynamique, on impose que tous les
+        volumes et la capacité du sac soient des nombres entiers. Si, dans la
+        vraie vie, les nombres ne sont pas entiers, on peut toujours transformer
+        le problème en multipliant tous les volumes et la capacité par un
+        facteur commun pour que les volumes et la capacité du sac à dos soient
+        des nombres entiers.
+
+    *   Chaque paquet de pâtes constitue un article à part entière et est donc
+        noté dans une ligne à part entière dans le tableau.
+
+    *   La colonne "Description" du tableau n'a aucune importance dans le
+        problème. On ne prend en compte que le volume et la valeur nutritive des
+        aliments.
+
+    *   On ne peut pas "ouvrir" un paquet de pâtes pour prendre la moitié du
+        paquet. Pour chaque article, soit on le prend complètement, soit on ne
+        le prend pas du tout, d'où le nom du problème **0-1**-Knapsack Problem.
+
+    *   On aurait pu remplacer les volumes en [l] par des poids en [kg] et
+        mettre une contrainte de poids maximal de 50 kg au le sac à dos au lieu
+        des 50 litres de contenance.
+
+Formulation mathématique (Rappel)
+---------------------------------
+
+Mathématiquement, on formule le problème à l'aide de variables de décision, de
+contraintes et d'une **fonction objectif** (= valeur à optimiser). On considère
+que :math:`N` est le nombre d'objets emportés. Les données du problème sont les
+suivantes:
+
+..  admonition:: Données connues du problème
+
+    On peut représenter le problème à l'aide de trois listes 
+
+    - La liste ``V`` dont chaque élément ``V[i]`` indique le volume de l'objet
+      numéro :math:`i`.
+
+    - Liste ``N`` dont chaque élément ``N[i]`` indique la valeur nutritive de
+      l'objet numéro :math:`i`.
+
+..  admonition:: Variables de décision
+
+    Dans ce problème, les variables de décision sont des variables binaires
+    :math:`x_i \in \{0, 1\}` définies de la manière suivante pour tout
+    :math:`0 \leq i \leq N`,
+
+    ..  math::
+
+        x_i = \begin{cases}
+        1 &\text{si on prend l'objet $i$} \\
+        0 &\text{sinon} \\
+        \end{cases}
+
+    Pour l'instance considérée en exemple, il y a six variable de décision
+    :math:`x_0, \ldots, x_5`, une pour chacun des articles que l'on peut
+    potentiellement emporter.
 
 
-Il est possible d'améliorer considérablement les performances de l'algorithme
-récursif de Fibonacci vu à la page :ref:`prog-dynamique-fibonacci` en utilisant
-une technique de **mémoïsation**. Cette technique consiste à stocker les
-résultats des appels récursifs dans un dictionnaire afin d'éviter de refaire les
-mêmes calculs plusieurs fois.
+..  admonition:: Contraintes
 
-Mémoïsation avec un dictionnaire
-================================
+    Dans le cas du problème du sac à dos, il n'y a qu'une seule contrainte,
+    formulée comme une inéquation linéaire:
 
-..  activecode:: fibonacci_rec_memo_py
+    ..  math::
+
+        \sum_{i=0}^{N-1}
+        x_i \cdot V[i]
+        \leq 
+        C
+
+    Pour l'instance considérée en exemple, pour un sac à dos de 50 litres, la
+    contrainte s'écrit
+
+    ..  math::
+        
+        x_0 \cdot 13 + x_1 \cdot 13 + x_2 \cdot 13 + x_3 \cdot 10 + x_4 \cdot 24 + x_5 \cdot 11 \leq 50
+
+..  admonition:: Fonction objectif
+
+    La fonction objectif indique la valeur qui doit être optimisée. Dans notre
+    cas, il s'agit de la valeur nutritive totale emportée dans le sac à dos. En
+    l'occurrence, la valeur objectif à optimiser est donnée par la fonction
+
+    ..  math::
+
+        f(X) = f(x_0, \ldots, x_{N-1}) = \sum_{i=0}^{N-1} x_i \cdot N[i]
+
+    Pour l'instance considérée en exemple, la fonction objectif est donc
+
+    ..  math::
+
+        f(X) &= f(x_0, x_1, x_2, x_3, x_4, x_5) \\
+        &= x_0 \cdot 2600 + x_1 \cdot 2600 + x_2
+        \cdot 2600 + x_3 \cdot 500 + x_4 \cdot 4500 + x_5 \cdot 960
+
+        
+Résoudre le problème du sac à dos consiste à attribuer à chaque variable de
+décision :math:`x_i` une valeur dans :math:`\{0, 1\}` de telle manière que
+toutes les contraintes soient satisfaites. De plus, il faut trouver une solution
+optimale, à savoir une solution qui maximise la fonction objectif :math:`f`. La
+programmation dynamique se préoccupe avant tout de trouver le profit maximal et
+détermine les objets à rajouter concrètement dans le sac une fois le problème de
+la valeur optimale connue.
+
+Résolution par la force brute
+=============================
+
+Commençons par une approche naïve de résolution du problème du sac à dos, à
+savoir la force brute. L'idée est de générer toutes les combinaisons possibles
+d'objets à emporter, de vérifier pour chacune d'entre elles si elle respecte la
+contrainte de capacité du sac à dos et de calculer la valeur nutritive totale
+emportée pour chacune d'entre elles. On peut ensuite sélectionner la combinaison
+qui respecte la contrainte et qui maximise la valeur nutritive totale emportée.
+
+..  activecode:: knapsack_brute_force_py
     :language: webtp
     :interpreterargs: debug_mode=true&layout=["Editor", "Console"]
 
-    Optimisez l'algorithme récursif de la suite de Fibonacci développé à l'exercice
-    précédent en utilisant le technique de **mémoïsation**. Développez une fonction
-    ``fibonacci_rec_opt(n: int) -> int`` qui retourne le :math:`n`-ième terme de la
-    suite de Fibonacci avec une technique de mémoïsation. 
-    
-    ..  admonition:: Indication
-        :class: tip
+    Développez une fonction ``knapsack_solver(profits: list[int], weights:
+    list[int], capacity: int) -> list [int]`` qui retourne **une** solution
+    optimale (il peut y en avoir plusieurs). Vous pouvez utiliser les données de
+    l'instance ``toy-instance`` présentée ci-dessus pour tester votre fonction.
 
-        Il faut utiliser un dictionnaire **global** ``already_computed`` dans
-        lequel les clés seront l'argument passé à la fonction. Avant de
-        retourner la valeur, on la stocke dans le dictionnaire
-        ``already_computed``. Avant de calculer la valeur, on vérifie dans le
-        dictionnaire si la valeur n'a pas déjà été calculée précédemment. Si
-        c'est le cas, on retourne simplement la valeur qui existe dans le
-        dictionnaire au lieu de refaire le calcul.
-
-        On devrait donc avoir le déroulement suivante
-
-        ::
-
-            >>> already_computed = {}
-            >>> fibonacci_rec_opt(0)
-            >>> already_computed
-            {0: 0}
-            >>> fib_rec(2)
-            >>> already_computed
-            {0: 0, 1: 1, 2: 1}
-            >>> fib_rec(4)
-            >>> already_computed
-            {0: 0, 1: 1, 2: 1, 3: 2, 4: 3}
-
-
-    ..  admonition:: Exemple d'utilisation
-        :class: important
-
-        ::
-
-            >>> fib_rec(0)
-            0
-            >>> fib_rec(1)
-            1
-            >>> fib_rec(3)
-            2
-            # impossible à faire avec la version non mémoïsée
-            >>> fib_rec(150)
-            9969216677189303386214405760200
+    Définissez également une fonction ``volume(solution: list[int], weights:
+    list[int]) -> int`` qui calcule le volume total de la solution donnée en
+    argument. De même, définissez une fonction ``profit(solution: list[int],
+    profits: list[int]) -> int`` qui calcule le profit total de la solution
+    donnée en argument.
 
     ~~~~
 
-    def fib_rec(n: int) -> int:
+    # Données de l'instance
+    N = [2600, 2600, 2600, 500, 4050, 960]
+    V = [13, 13, 13, 10, 24, 11]
+    C = 50
+
+    # Domaine de valeurs des variables de décision
+    domain = [0, 1]
+
+    def volume(solution: list[int], weights: list[int]) -> int:
         '''
-        >>> fib_rec(0)
-        0
-        >>> fib_rec(1)
-        1
-        >>> fib_rec(7)
-        13
-        >>> fib_rec(8)
-        21
-        >>> fib_rec(9)
-        34
-        >>> fib_rec(40)
-        102334155
-        >>> fib_rec(150)
-        9969216677189303386214405760200
-        >>> fib_rec(1000)
-        43466557686937456435688527675040625802564660517371780402481729089536555417949051890403879840079255169295922593080322634775209689623239873322471161642996440906533187938298969649928516003704476137795166849228875
-        >>> fib_rec(1500)
-        13551125668563101951636936867148408377786010712418497242133543153221487310873528750612259354035717265300373778814347320257699257082356550045349914102924249595997483982228699287527241931811325095099642447621242200209254439920196960465321438498305345893378932585393381539093549479296194800838145996187122583354898000
-        
+        >>> volume([1, 0, 1, 0, 1, 0], V)
+        50
+        '''
+        ...
+
+    def profit(solution: list[int], profits: list[int]) -> int:
+        '''
+        >>> profit([1, 0, 1, 0, 1, 0], N)
+        9700
+        '''
+        ...
+
+    def bf_knapsack_solver(profits: list[int], weights: list[int], capacity: int) -> int:
+        '''
+        >>> solution = bf_knapsack_solver(N, V, C)
+        >>> solution in [(1, 1, 0, 0, 1, 0), (1, 0, 1, 0, 1, 0), (0, 1, 1, 0, 1, 0)]
+        True
         '''
 
         ...
 
-    if __name__ == '__main__':
-        import doctest
-        doctest.testmod()
+    import doctest
+    doctest.testmod()
 
 
+Analyse de la complexité de l'approche par la force brute
+---------------------------------------------------------
 
-..  reveal:: 3320493c-868b-4595-a101-c018c538e0e6
+..  shortanswer:: knapsack-brute-force-complexity
+
+    Faites une analyse de la complexité de l'approche par la force brute. En
+    particulier, quelle est la complexité temporelle et spatiale de cette
+    approche?
+
+..  reveal:: knapsack-brute-force-complexity-solution
     :showtitle: Solution
+    :hidetitle: Cacher la solution
 
-    ..  figure:: figures/refactore-fib-memoization.png
-        :align: center
-        :width: 100%
+    ..  admonition:: Solution
 
-        Étapes pour rajouter la mémoïsation à la fonction ``fib(n)``
+        La complexité temporelle de l'approche par la force brute est en
+        :math:`O(2^N)`, où :math:`N` est le nombre d'objets disponibles. En
+        effet, il y a :math:`2^N` combinaisons possibles d'objets à emporter
+        (chaque objet peut être soit pris, soit laissé). La complexité spatiale
+        de cette approche est en :math:`O(N)` si on considère que l'on stocke
+        uniquement la meilleure combinaison trouvée jusqu'à présent, ou en
+        :math:`O(2^N)` si on stocke toutes les combinaisons générées.
 
-    On présente ci-dessous deux solutions
+Approche récursive avec mémoïsation (Top-Down)
+==============================================
+
+..  activecode:: knapsack_top_down_py
+    :language: webtp
+    :interpreterargs: debug_mode=true&layout=["Editor", "Console"]
+
+    Implémentez une fonction ``knapsack_rec(profits: list[int], weights:
+    list[int], capacity: int) -> int`` qui résout le problème du sac à dos en
+    utilisant une approche récursive avec mémoïsation (Top-Down). 
+
+    ..  note::
+
+        La fonction retourne uniquement la valeur optimale qu'il est possible de
+        mettre dans le sac sans déterminer les objets à emporter (valeur des
+        variables de décision). Nous allons voir comment faire cela plus tard
+        une fois la valeur optimale connue.
+
+    ~~~~
+
+    # Données de l'instance
+    N = [2600, 2600, 2600, 500, 4050, 960]
+    V = [13, 13, 13, 10, 24, 11]
+    C = 50
+
+    def knapsack_rec(profits: list[int], weights: list[int], capacity: int) -> int:
+        '''
+        >>> knapsack_rec(N, V, C)
+        9700
+        '''
+        ...
+
+    import doctest
+    doctest.testmod()
+
+
+
+Approche itérative tabulaire (Bottom-Up)
+========================================
+
+Adaptez la version récursive avec mémoïsation du solveur du sac à dos pour
+en faire une version itérative tabulaire (Bottom-Up).
+
+Calcul de la valeur optimale du sac à dos
+-----------------------------------------
+
+..  activecode:: knapsack_bottom_up_py
+    :language: webtp
+    :interpreterargs: debug_mode=true&layout=["Editor", "Console"]
+
+    Définissez une fonction ``knapsack_bottom_up(profits: list[int], weights:
+    list[int], capacity: int) -> int`` qui résout le problème du sac à dos en
+    utilisant une approche itérative tabulaire (Bottom-Up).
 
     ..  note:: 
 
-        Si vous exécutez le code dans un navigateur, il est possible que la
-        profondeur de la récursion ne puisse pas être augmentée à 2000
-        suivant le navigateur.
+        La fonction retourne uniquement la valeur optimale qu'il est possible de
+        mettre dans le sac sans déterminer les objets à emporter (valeur des
+        variables de décision). Nous allons voir comment faire cela plus tard
+        une fois la valeur optimale connue.
 
-    ..  activecode:: decac617-0beb-488b-b52d-8ca65ec4e6b6
-        :language: webtp
-        :interpreterargs: debug_mode=true&layout=["Editor", "Console"]
+    ~~~~
 
-        La première solution est celle que vous avez sans doute trouvée
-        rapidement.
+    # Données de l'instance
+    N = [2600, 2600, 2600, 500, 4050, 960]
+    V = [13, 13, 13, 10, 24, 11]
+    C = 50
 
-        ~~~~
+    def knapsack_bottom_up(profits: list[int], weights: list[int], capacity: int) -> int:
+        '''
+        >>> knapsack_bottom_up(N, V, C)
+        9700
+        '''
+        ...
 
-        import sys
-        sys.setrecursionlimit(2000)
-
-        already_computed = {}
-
-        def fib_rec(n):
-            if n in already_computed:
-                return already_computed[n]
-
-            result = None
-            if n < 2:
-                result = n
-            else:
-                result = fib_rec(n-1) + fib_rec(n-2)
-            already_computed[n] = result
-            return result
-            
-        print(fib_rec(40))
-        print(fib_rec(150))
-        print(fib_rec(1000))
-        print(fib_rec(1500))
-
-    ..  activecode:: 9201076d-687f-4337-bb60-eefaf9039da9
-        :language: webtp
-        :interpreterargs: debug_mode=true&layout=["Editor", "Console"]
-
-        Cette deuxième solution représente le cas de base de la récursion en
-        préremplissant le dictionnaire avec les deux cas de base de la suite de
-        Fibonacci. Dans cette version, il n'y a donc plus le cas de base ``if n
-        < 2``, qui est matérialisé par l'initialisation de la table de
-        mémoïsation.
-
-        ~~~~
-
-        import sys
-        sys.setrecursionlimit(2000)
-
-        already_computed = {0: 0, 1: 1}
-
-        def fib_rec(n):
-            result = None
-            if n in already_computed:
-                return already_computed[n]
-            else:
-                result = fib_rec(n-1) + fib_rec(n-2)
-            already_computed[n] = result
-            return result
-            
-        print(fib_rec(40))
-        print(fib_rec(150))
-        print(fib_rec(1000))
-        print(fib_rec(1500))
-
-Arbre des appels récursifs avec la mémoïsation
-==============================================
-
-De manière générale, la mémoïsation sert à éviter de recalculer un résultat déjà
-calculé au préalable. Concrètement, au niveau des appels récursifs, cela a pour
-effet de couper toutes les branches inutiles de l'arbre des appels de la
-fonction récursive, comme le montre la figure :ref:`fib-6-tree-with-memo` pour
-l'appel ``fib(6)``.
-
-..  only:: html
-
-    L'animation ci-dessous montre les appels récursifs de la version mémoïsée
-    ``fib(n=6)``.
-
-    ..  figure:: figures/fib_memoized-6.gif
-        :align: center
-        :width: 65%
-
-        Animation montrant les appels récursifs à la fonction ``fib(n)`` pour
-        :math:`n = 6`
+    import doctest
+    doctest.testmod()
 
 
-..  _fib-6-tree-with-memo:
+Reconstitution de la solution optimale
+--------------------------------------
 
-..  figure:: figures/fib_memoized-6.png
-    :align: center
-    :width: 40%
+Une fois le tableau de programmation dynamique rempli, on peut reconstituer la
+solution optimale en remontant le tableau à partir de la valeur optimale
+trouvée. Cela nous permettra de déterminer quels objets doivent être emportés
+dans le sac à dos pour atteindre la valeur optimale.
 
-    Arbre des appels récursifs lors de l'appel ``fib(6)``
+..  activecode:: knapsack_solution_reconstruction_py
+    :language: webtp
+    :interpreterargs: debug_mode=true&layout=["Editor", "Console"]
 
-Analyse de complexité de la récursion avec la mémoïsation
-=========================================================
+    Rajoutez à la solution de l'étape précédente une fonction
+    ``reconstruct_solution(profits: list[int], weights: list[int], capacity:
+    int, dp_table: list[list[int]]) -> list[int]`` qui prend en argument le
+    tableau de programmation dynamique rempli et retourne une solution optimale
+    (une liste de 0 et de 1 indiquant quels objets emporter).
 
-Complexité temporelle
----------------------
-
-De manière générale, pour déterminer la complexité d'un algorithme utilisant la
-programmation dynamique, on considère le nombre d'appels récursifs non mémoïsés
-à faire. En effet, les appels mémoïsés coûtent :math:`\Theta(1)` en temps pour
-autant que la table de mémoïsation permette un accès en :math:`\Theta(1)`
-opérations.
-
-..  math:: 
-
-    \text{nombre d'appels non mémoïsés} \times \text{complexité pour chaque
-    appel non mémoïsé}
-
-Dans le cas présent, pour calculer le terme de rang :math:`n` de la suite de
-Fibonacci, il faut calculer tous les :math:`n` termes précédents, ce qui fait en
-tout :math:`n+1` sous-problèmes (appels non mémoïsés). En supposant que
-l'addition de :math:`F(n-1)` et :math:`F(n-2)` est :math:`\Theta(1)`, la
-résolution de chaque sous-problème est :math:`\Theta(1)`, puisque les appels
-récursifs sont mémoïsés. La complexité temporelle est donc :math:`(n+1) \times
-\Theta(1) = \Theta(n)`.
-
-Une autre manière de déterminer la complexité temporelle est de déterminer le
-nombre de nœuds de l'arbre des appels récursifs. Comme le montre la figure
-:ref:`fib-6-tree-with-memo`, la version mémoïsée ne demande que :math:`n + (n - 1)
-= 2n-1` appels, ce qui donne lieu à une complexité temporelle de
-:math:`\Theta(n)`.
-
-Complexité spatiale
--------------------
-
-La complexité spatiale de l'algorithme n'est pas améliorée par la mémoïsation.
-Au contraire, la version mémoïsée demande davantage de mémoire que la version
-naïve. En effet, en plus de devoir stocker la pile d'appels récursifs, également
-de hauteur :math:`n` dans la version mémoïsée, il faut encore stocker la table
-de hachage de mémoïsation, qui occupe également :math:`\Theta(n)` unités
-mémoire. Ainsi, la version mémoïsée nécessite en gros deux fois plus de mémoire
-que la version naïve mais reste :math:`\Theta(n)`.
+    ~~~~
 
 
-Limites de l'approche récursive descendante
-===========================================
+Complexité de l'approche par la programmation dynamique
+=======================================================
 
-Même si la technique de mémoïsation permet d'améliorer considérablement
-lesperformances de l'algorithme récursif, elle ne permet pas de résoudre tous
-les problèmes. 
+..  shortanswer:: knapsack-dp-complexity
 
-..  shortanswer:: test_fib_rec_memo_rec_depth_limit
+    Faites une analyse de la complexité de l'approche par la programmation
+    dynamique. En particulier, quelle est la complexité temporelle et spatiale de
+    cette approche?
 
-    Appelez la fonction ``fibonacci_rec_opt`` développée dans l'exercice
-    précédent pour ``n`` dans ``[150, 500, 1000, 8000]``.
+..  reveal:: knapsack-dp-complexity-solution
+    :showtitle: Solution
+    :hidetitle: Cacher la solution
+    :instructoronly:
 
-    Que se passe-t-il pour :math:`n = 8000`? Donnée une explication détaillée de
-    ce qui se passe.
+    ..  admonition:: Solution
 
-..  reveal:: 008d38ed-7b2b-4ccf-9d6c-b76cbaed9042
-    :showtitle: Réponse
+        La complexité temporelle de l'approche par la programmation dynamique
+        est en :math:`O(N \cdot C)`, où :math:`N` est le nombre d'objets
+        disponibles et :math:`C` est la capacité du sac à dos. En effet, il faut
+        remplir un tableau de taille :math:`N \times C` et chaque cellule du
+        tableau peut être calculée en temps constant. La complexité spatiale de
+        cette approche est également en :math:`O(N \cdot C)` si on stocke le
+        tableau complet, ou en :math:`O(C)` si on optimise l'espace en ne
+        stockant que la dernière ligne du tableau à un moment donné.
 
-    ..  admonition:: Réponse
 
-        Même si les calculs peuvent être effectués relativement efficacement, le
-        programme produit néanmoins une erreur d'exécution. La raison est que le
-        nombre d'appels récursifs dépasse la limite autorisée. Techniquement,
-        rien n'empêcherait de faire plus d'appels récursifs, car l'ordinateur
-        contient suffisamment de mémoire pour la pile d'appels qui ne doit
-        stocker à chaque fois que le paramètre :math:`n`.
+Test sur des instances plus grandes
+===================================
 
-        Pour cela, on peut modifier manuellement la limite du nombre d'appels
-        récursifs (voir par exemple
-        https://stackoverflow.com/questions/3323001/what-is-the-maximum-recursion-depth-in-python-and-how-to-increase-it)
-
-..  note::
-
-    La programmation dynamique qui utilise la récursion et la mémoïsation est
-    appelée "top-down" (de haut en bas) car elle commence par le problème global
-    et le divise en sous-problèmes plus petits, jusqu'à atteindre les cas de
-    base. En d'autres termes, on part du problème que l'on veut résoudre pour
-    remonter progressivement vers les cas de base qui sont connus.
+Testez les deux approches (Top-Down et Bottom-Up) sur des instances plus grandes
+du problème du sac à dos. Vous trouverez des instances de test dans le dossier
+``data/knapsack``.
 
