@@ -102,8 +102,34 @@ Partie 2 : Programmation par contraintes
 ..
     cp/global-constraints.rst
 
-Partie 3 : Un solveur plus puissant
-:::::::::::::::::::::::::::::::::::
+Partie 3 : Programmation dynamique
+::::::::::::::::::::::::::::::::::
+
+..  admonition:: Résumé
+
+    La programmation dynamique est une technique algorithmique de résolution de
+    problèmes d'optimisation combinatoire. Elle repose sur le principe de
+    "diviser pour régner" et permet de résoudre efficacement des problèmes qui
+    peuvent être décomposés en sous-problèmes plus petits.
+
+    On pourrait dire que la programmation dynamique est une forme de mémoïsation
+    systématique, où les résultats des sous-problèmes sont stockés pour éviter
+    les calculs redondants.
+
+..  toctree::
+    :maxdepth: 2
+    :numbered:
+    
+    dp/introduction.rst
+    dp/fibonacci.rst
+    dp/memoization-top-down.rst
+    dp/graphe-de-dependances.rst
+    dp/tabulation-bottom-up.rst
+    dp/knapsack.rst
+
+
+BONUS : Un solveur plus puissant
+::::::::::::::::::::::::::::::::
 
 ..  note::
 
@@ -124,6 +150,8 @@ Partie 3 : Un solveur plus puissant
     better-cp-solver/statemanager.rst
     better-cp-solver/state-stack.rst
     better-cp-solver/sparse-sets.rst
+
+
 
 
 ..
