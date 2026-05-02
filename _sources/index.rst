@@ -128,6 +128,7 @@ Partie 3 : Programmation dynamique
     dp/knapsack.rst
 
 
+
 BONUS : Un solveur plus puissant
 ::::::::::::::::::::::::::::::::
 

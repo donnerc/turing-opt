@@ -21,3 +21,7 @@ sous-problèmes contiennent eux-mêmes des sous-problèmes en commun.
 
 Nous mettons ici passablement de matériel didactique (souvent en anglais) pour
 maîtriser cette technique qui demande du temps et de l’entraînement.
+
+..  note::
+
+    Ce chapitre est basé sur https://gyminf-ads2-dp.surge.sh/01-fibonacci.html

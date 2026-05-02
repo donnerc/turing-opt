@@ -9,12 +9,6 @@ Le problème avec les nombres de Fibonacci récursifs
 Générer la suite de Fibonacci de manière récursive est en gros le "Hello world"
 de la programmation dynamique. 
 
-..  note::
-
-    Les explications détaillées se trouvent dans
-    https://gyminf-ads2-dp.surge.sh/01-fibonacci.html
-
-
 Nombres de fibonacci récursifs
 ==============================
 
