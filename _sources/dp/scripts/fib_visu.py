@@ -2,8 +2,6 @@
 
 import sys
 
-from _sources.db.scripts.dp import memoize
-
 # Import Visualiser class from module visualiser
 from visualiser.visualiser import Visualiser as vs
 
@@ -100,7 +98,11 @@ if __name__ == "__main__":
         n = int(sys.argv[1])
     if len(sys.argv) > 2:
         delay = float(sys.argv[2])
+    else:
+        delay = 1.5
     if len(sys.argv) > 3:
         filename = str(sys.argv[3])
+    else:
+        filename = "image"
 
     main(n, delay, filename)

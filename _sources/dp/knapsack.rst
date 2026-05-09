@@ -175,7 +175,7 @@ qui respecte la contrainte et qui maximise la valeur nutritive totale emportée.
     ~~~~
 
     # Données de l'instance
-    N = [2600, 2600, 2600, 500, 4050, 960]
+    N = [2600, 2600, 2600, 500, 4500, 960]
     V = [13, 13, 13, 10, 24, 11]
     C = 50
 
@@ -253,7 +253,7 @@ Approche récursive avec mémoïsation (Top-Down)
     ~~~~
 
     # Données de l'instance
-    N = [2600, 2600, 2600, 500, 4050, 960]
+    N = [2600, 2600, 2600, 500, 4500, 960]
     V = [13, 13, 13, 10, 24, 11]
     C = 50
 
@@ -296,7 +296,7 @@ Calcul de la valeur optimale du sac à dos
     ~~~~
 
     # Données de l'instance
-    N = [2600, 2600, 2600, 500, 4050, 960]
+    N = [2600, 2600, 2600, 500, 4500, 960]
     V = [13, 13, 13, 10, 24, 11]
     C = 50
 
@@ -358,10 +358,133 @@ Complexité de l'approche par la programmation dynamique
         stockant que la dernière ligne du tableau à un moment donné.
 
 
+
+Représentation des instances
+============================
+
+Une **instance** de problème de sac à dos est un problème particulier, avec des
+objets particuliers et un sac à dos d'une certaine capacité.
+
+classe ``KPInstance``
+---------------------
+
+On peut représenter une instance de problème du sac à dos avec la classe
+``KPInstance`` ci-dessous:
+
+..  activecode:: kpinstance_py
+    :language: webtp
+    :interpreterargs: branch=branch&device=-&debug_mode=true&layout=["Editor","Console"]
+
+    ######################## Importation dans WebTigerPython ############
+    from pyodide.http import open_url
+    url = 'https://raw.githubusercontent.com/donnerc/prog-dynamique/refs/heads/main/source/scripts/kp_instances/toy-instance'
+    with open('toy-instance.txt', 'w') as fd: fd.write(open_url(url).read())
+    ############################################################
+
+    class KnapsackInstance:
+        '''
+        >>> filepath = 'toy-instance.txt'
+        >>> kp = KnapsackInstance.load_from_file(filepath)
+        >>> kp
+        KnapsackInstance(W=[13, 13, 13, 10, 24, 11], V=[2600, 2600, 2600, 500, 4500, 960], C=50)
+
+        '''
+
+        def __init__(self, W: list[int], V: list[int], C: int) -> None:
+            self.W: list[int] = W
+            self.V: list[int] = V
+            self.C: int = C
+            self.size: int = len(W)
+
+        def __repr__(self):
+            return f"{__class__.__name__}(W={self.W}, V={self.V}, C={self.C})"
+
+    import doctest
+    doctest.testmod()
+
+Format de fichier
+-----------------
+
+..  admonition:: Exemple
+
+    L'instance :ref:`small-instance-by-hand` peut être représentée dans le
+    fichier ci-dessous, dont le format est (C = capacité du sac, :math:`W_i` =
+    poids/volume de l'objet :math:`i` et :math:`V_i` = valeur de l'objet
+    :math:`i`):
+
+    ::
+
+        n C
+        W1 V1
+        W2 V2
+        ...
+        Wn Vn
+
+    ..  datafile:: toy-instance
+
+        6 50
+        13 2600
+        13 2600
+        13 2600
+        10 500
+        24 4500
+        11 960
+
+Chargement des instances
+------------------------
+
+Développez la méthode statique ``load_from_file(filepath) -> KnapsackInstance``
+de la classe ``KnapsackInstance`` qui retourne une instance de la classe
+``KnapsackInstance`` avec les données chargées depuis le fichier.
+
+..  note:: 
+
+    On suppose ici que toutes les capacités de sac à dos sont des nombres
+    entiers.
+
+..  reveal:: 2c588a45-a1e6-429c-a73d-7a39251c3401
+    :showtitle: Solution
+    :hidetitle: Cacher la solution
+    :instructoronly:
+
+    ..  code-block:: python
+
+        @staticmethod
+        def load_from_file(filepath: str) -> 'KnapsackInstance':
+            '''
+            '''
+            W: list[int] = []
+            V: list[int] = []
+            C: int = 0
+            
+            # add code here to load instances
+            with open(filepath, 'r') as instance_file:
+                n, C = [int(x) for x in instance_file.readline().split(' ')]
+                
+                for _ in range(n):
+                    w, v = [int(x) for x in instance_file.readline().split(' ')]
+                    W.append(w)
+                    V.append(v)
+            
+            return KnapsackInstance(W, V, C)
+
 Test sur des instances plus grandes
 ===================================
 
 Testez les deux approches (Top-Down et Bottom-Up) sur des instances plus grandes
-du problème du sac à dos. Vous trouverez des instances de test dans le dossier
-``data/knapsack``.
+du problème du sac à dos. Vous trouverez des instances de test dans
+https://github.com/donnerc/turing-opt/tree/main/_sources/dp/scripts/kp_instances/johnyortega
 
+Test de l'approche top down
+---------------------------
+
+..  activecode:: topdown_knapsack_large_instances_py
+    :language: webtp
+    :interpreterargs: branch=branch
+
+Test de l'approche bottom up
+----------------------------
+
+..  activecode:: bottomup_knapsack_large_instances_py
+    :language: webtp
+    :interpreterargs: branch=branch

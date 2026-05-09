@@ -126,6 +126,7 @@ Partie 3 : Programmation dynamique
     dp/graphe-de-dependances.rst
     dp/tabulation-bottom-up.rst
     dp/knapsack.rst
+    dp/exos.rst
 
 
 
